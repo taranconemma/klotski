@@ -1,0 +1,13 @@
+**/__pycache__
+**/.mypy_cache
+
+# images
+**/*.png
+
+# movies
+**/*.gif
+**/*.mp4
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
