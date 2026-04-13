@@ -213,8 +213,8 @@ el nou programa.
    registrades a `pixi.toml`) amb:
 
 ```sh
-git clone https://github.com/pauek/AP2-2026P-Practica2.git
-cd AP2-2026P-Practica2
+git clone https://github.com/pauek/klotski.git
+cd klotski
 pixi install
 ```
 
@@ -253,7 +253,7 @@ Si tot surt bé a la terminal us hauria de sortir una cosa
 similar a aquesta:
 
 ```bash
-(Klotski) usuari:~/AP2-2026P-Practica2$
+(Klotski) usuari:~/klotski$
 ```
 
 El prefix entre parèntesis `(Klotski)` prové del nom del
@@ -266,7 +266,7 @@ vulgueu:
 Per jugar a un _puzzle_
 
 ```sh
-python src/play.py puzzles/1.json
+python src/play.py puzzles/sample1.json
 ```
 
 Per generar una imatge de l'estat inicial d'un _puzzle_:
