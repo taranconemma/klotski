@@ -4,10 +4,13 @@
 
 # Klotski! (Pràctica 2 d'AP2, Primavera de 2026)
 
-Aquesta pràctica tracta de fer una **cerca col·laborativa de
-trencaclosques tipus
-[Klotski](https://en.wikipedia.org/wiki/Klotski)**, mitjançant
-una valoració dels trencaclosques amb algoritmes de grafs.
+Posa a prova els teus coneixements de grafs resolent el clàssic
+**[Klotski](https://en.wikipedia.org/wiki/Klotski)**! En aquesta
+pràctica, dissenyaràs un algorisme que trobi la seqüència de
+moviments necessària per resoldre aquest tipus de trencaclosques.
+A més, podràs participar en una modalitat col·laborativa: crea
+els teus propis reptes, resol els dels teus companys i valora les
+millors propostes del curs.
 
 En comptes de prohibir-la, la pràctica **_assumeix_ l'ús d'alguna
 Intel·ligència Artificial de suport**. Tanmateix, l'alumnat es
@@ -54,10 +57,10 @@ puzzles_ (Klotski és potser el més famós), hi ha un taulell de
 $N \times M$ caselles, i un conjunt de peces que ocupen aquestes
 caselles. Les peces són de formes variades però sovint són
 rectangulars, i es poden desplaçar pel taulell sense poder
-solapar-se. A vegades també s'hi posen "parets", o sigui caselles
-a les quals les peces no poden entrar. Les peces estan situades
-en una posició inicial, i l'objectiu és moure una o més peces
-objectiu (en un color llampant) fins a una posició final.
+superposar-se. A vegades també s'hi posen "parets", o sigui
+caselles a les quals les peces no poden entrar. Les peces estan
+situades en una posició inicial, i l'objectiu és moure una o més
+peces objectiu (en un color llampant) fins a una posició final.
 
 <p align="center">
   <img src="img/sbp.gif" alt="Exemple sbp">
@@ -104,13 +107,13 @@ L'objectiu de la pràctica és desenvolupar un programa que
 contribueixi a la cerca col·laborativa de la següent manera:
 
 1. Pugui descarregar un _puzzle_ d'un repositori compartit.
-2. Creï el graf d'un _puzzle_ per analitzar-lo.
-3. Resolgui un _puzzle_ fent servir el graf.
-4. Valori els _puzzles_ existents fent servir mesures sobre el
+2. Resolgui un _puzzle_ fent servir un model de recorregut de
+   grafs.
+3. Valori els _puzzles_ existents fent servir mesures sobre el
    graf.
-5. Envïi les valoracions dels _puzzles_ al repositori compartit.
-6. Generi _puzzles_ a l'atzar i en triï els millors.
-7. Enviï els millors _puzzles_ generats per tal que els valori la
+4. Envïi les valoracions dels _puzzles_ al repositori compartit.
+5. Generi _puzzles_ a l'atzar i en triï els millors.
+6. Enviï els millors _puzzles_ generats per tal que els valori la
    resta de participants en el projecte.
 
 Si la col·laboració funciona bé, és molt possible que els puzzles
