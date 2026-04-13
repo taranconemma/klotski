@@ -1,9 +1,6 @@
 **/__pycache__
 **/.mypy_cache
 
-# images
-**/*.png
-
 # movies
 **/*.mp4
 
