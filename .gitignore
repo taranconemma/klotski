@@ -5,7 +5,6 @@
 **/*.png
 
 # movies
-**/*.gif
 **/*.mp4
 
 # pixi environments
