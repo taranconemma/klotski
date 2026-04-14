@@ -4,10 +4,13 @@
 
 # Klotski! (Pràctica 2 d'AP2, Primavera de 2026)
 
-Aquesta pràctica tracta de fer una **cerca col·laborativa de
-trencaclosques tipus
-[Klotski](https://en.wikipedia.org/wiki/Klotski)**, mitjançant
-una valoració dels trencaclosques amb algoritmes de grafs.
+Posa a prova els teus coneixements de grafs resolent el clàssic
+**[Klotski](https://en.wikipedia.org/wiki/Klotski)**! En aquesta
+pràctica, dissenyaràs un algorisme que trobi la seqüència de
+moviments necessària per resoldre aquest tipus de trencaclosques.
+A més, podràs participar en una modalitat col·laborativa: crea
+els teus propis reptes, resol els dels teus companys i valora les
+millors propostes del curs.
 
 En comptes de prohibir-la, la pràctica **_assumeix_ l'ús d'alguna
 Intel·ligència Artificial de suport**. Tanmateix, l'alumnat es
