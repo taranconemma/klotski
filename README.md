@@ -770,15 +770,15 @@ el
 ## FAQ
 
 - **P**: Què passa si canvio la forma de mesurar l'"interès" a
-  mig projecte?
-- **R**: Cap problema. Simplement torna a enviar les valoracions
+  mig projecte? \
+  **R**: Cap problema. Simplement torna a enviar les valoracions
   de tots els puzzles presents i les noves valoracions
   sobreescriuen les anteriors. Aquí el `rate_all.py` val el seu
   pes en or.
 
 - **P**: Per fer aquest projecte necessitem escriure milers de
-  línies de codi??!?!
-- **R**: An absolut, cada eina (cada `.py`) és relativament
+  línies de codi??!?! \
+  **R**: An absolut, cada eina (cada `.py`) és relativament
   simple i, pel fet d'utilitzar els algorismes de `graph-tool`,
   la part més tècnica no és gaire llarga.
 
@@ -786,8 +786,8 @@ el
   paral·lelisme difícil de negar amb un còmic de
   [XKCD](https://xkcd.com) titulat
   "[Nerd Sniping](https://xkcd.com/356/)" (descomptant primer la
-  "masculinitat" de l'acudit, _of course_)?
-- **R**: No podem confirmar in desmentir aquest rumor.
+  "masculinitat" de l'acudit, _of course_)? \
+  **R**: No podem confirmar in desmentir aquest rumor.
 
 <div id="refs" />
 
