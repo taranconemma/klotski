@@ -467,6 +467,33 @@ _puzzles_ amb valoració més baixa i se substitueix per
 l'enviament. D'aquesta manera el número màxim de _puzzles_ es
 manté sempre igual o menor que 200.
 
+**Com fer servir el token**: El _token_ per pujar _puzzles_ es fa
+servir en un "header HTTP". En una petició HTTP, que és com un
+formulari amb les dades que s'envien a un servidor, es poden
+adjuntar "metadades", i això la llibreria `urllib.request` (de la
+llibreria de Python) ens ho permet adjuntar si creem una petició
+(`Request`) així:
+
+```python
+# Creem un objecte Request
+enviades = '{ "cuchi": "cuchi" }'
+token = "x1y2z3a4b5c6d7e8"
+request = urllib.request.Request(
+    "https://myserver.com",
+    data = enviades,
+    method = "POST",
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}", # <-- Aquí es posa el token
+    }
+)
+
+# Fem la petició
+with urllib.request.urlopen(req) as response:
+    rebudes = response.read()
+    ...
+```
+
 <div id="format" />
 
 ## Format estàndard d'un _puzzle_ de peces lliscants
