@@ -127,6 +127,13 @@ class Puzzle:
         for i, pos in self.goals:
             if i < 0 or i >= n:
                 raise ValueError(f"Índex de peça invàlid: {i}")
+        # Les peces no es poden solapar en l'estat inicial
+        occupied: set[Coord] = set()
+        for piece, (px, py) in zip(self.pieces, self.start.positions):
+            cells = {(px + dx, py + dy) for dx, dy in piece.coords}
+            if occupied & cells:
+                raise ValueError("Les peces es solapen en l'estat inicial")
+            occupied |= cells
 
     def _to_obj(self) -> dict:
         return {
