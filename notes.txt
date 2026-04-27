@@ -1,0 +1,18 @@
+Para abrir los juegos y probarlos:
+    - Desde el terminal: 
+        cd Documents/UPCdades/1r/AP2/klotski    (donde yo lo tengo guardado)
+        pixi shell    (abrir el intérprete de Python)
+        python src/play.py puzzles/sample1.json    (para probar el sample1, o cualquier otro, guardado en la carpeta puzzles)
+
+Para cargar los puzzles desde la web al portatil:
+    - He tenido que ejecutar en el terminal:
+        pip install requests    (he tenido que instalarlo, no sé qué hace)
+                                (antes de entregarlo mirar si otro ordenador le funciona, lo he cambiado)
+        Applications/Python\ 3.11/Install\ Certificates.command (esto lo he tenido que poner con la opción actual que usa urllib)
+        python3 ./src/download.py    (para descargarlos)
+        El botón de play no funciona.
+    - Todo se guarda en la carpeta puzzles
+
+        
+
+        

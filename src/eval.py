@@ -1,0 +1,1 @@
+# eval.py. Avalua un puzzle donat en .json.
