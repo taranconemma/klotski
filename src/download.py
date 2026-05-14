@@ -12,12 +12,16 @@ print(len(ids))
 # 2. Descarregar cada puzzle
 os.makedirs("puzzles", exist_ok=True)
 
+a = 0
 for id in ids:
     with urllib.request.urlopen(f"{BASE_URL}/api/puzzles/{id}") as r:
         puzzle = json.load(r)
     
-    with open(f"puzzles/{id}.json", "w") as f:
+
+    # with open(f"puzzles/{id}.json", "w") as f:
+    with open(f"puzzles/{a:02}.json", "w") as f:
         json.dump(puzzle, f)
+    a += 1
     
     print(f"Descarregant puzzle {id}")
 

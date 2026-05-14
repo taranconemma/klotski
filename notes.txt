@@ -13,6 +13,14 @@ Para cargar los puzzles desde la web al portatil:
         El botón de play no funciona.
     - Todo se guarda en la carpeta puzzles
 
-        
-
+Para crear el repositorio de github:
+    He ejecutado:
+        git remote set-url origin https://github.com/taranconemma/klotski.git
+        git push -u origin main
+    Otras comandas (por investigar):
+        git add
+        git commit -m "descripción del cambio"
+        git checkout main
+        git merge nombre_de_tu_rama
+        git push
         
