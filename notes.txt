@@ -24,3 +24,8 @@ Para crear el repositorio de github:
         git merge nombre_de_tu_rama
         git push
         
+
+
+git add src/graph.py src/solve.py
+git commit -m "Afegir graph.py i solve.py"
+git push origin main

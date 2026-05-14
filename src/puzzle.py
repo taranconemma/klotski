@@ -43,8 +43,8 @@ class Piece:
             raise ValueError("Coordenades repetides")
         if self.coords != tuple(sorted(self.coords)):
             raise ValueError("Les coordenades no estan ordenades")
-        xs = [x for x, y in self.coords]
-        ys = [y for x, y in self.coords]
+        xs = [x for x, _ in self.coords]
+        ys = [y for _, y in self.coords]
         if min(xs) != 0 or min(ys) != 0:
             raise ValueError("La peça no està normalitzada (min x o min y != 0)")
 
@@ -53,8 +53,8 @@ class Piece:
         """Crea una peça normalitzada a partir de coordenades arbitràries."""
         if len(coords) == 0:
             raise ValueError("Una peça ha de tenir almenys una coordenada")
-        min_x = min(x for x, y in coords)
-        min_y = min(y for x, y in coords)
+        min_x = min(x for x, _ in coords)
+        min_y = min(y for _, y in coords)
         norm = sorted(set((x - min_x, y - min_y) for x, y in coords))
         return Piece(*norm)
 

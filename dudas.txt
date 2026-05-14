@@ -1,0 +1,31 @@
+Es mejor generar el graf y usarlo para el solve o el solve y que cuando encuentre la respuesta pare?
+Entonces es mejor un dfs o bfs (si queremos pasos minimos)
+
+que es esto del parser
+hay que usar Astar??
+creo que el graph se necesta para evaluar para el solve basta con un astar
+
+Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
+
+la funcion normalized del puzzle.py donde se usa
+
+no me funciona el View: me funcionan el sample3, el 4 ahora se ve muy feo todo esparcido
+
+TREES: clase que me salté
+    - Red-Black Trees lo explicó?? Hay que saber qué son??
+    - A qué se refiere con rotation??
+
+PREGUNTAR POR LA PROVA DE LAB DE COMPUS
+
+Mensaje Lola: holaa, sé que queda molt pero per anar-me organitzant
+            la classe del dimarts 26 que es just abans del final de mates la podríem fer bastant d'hora?
+            A les 15:00 o així? Perquè m'estan demanant una altra classe i si no no em dona temps
+            Si no et va bé em dius i miro d'organitzar-ho direfent. 
+
+Mensaje Ricard: holaa la classe de aquest dilluns com la de sempre i la del 25 et va bé fer de 17:00 a 19:00?? 
+                La del dimarts 26 puc només de 17:45 a 19:15 si et va bé. 
+Preguntar si la Laia irá al tiro el 25 de mayo.
+Averiguar a qué hora hay que llegar al concierto y quien nos lleva? (Pone que empieza a las 20:30)
+
+
+
