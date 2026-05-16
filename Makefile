@@ -27,4 +27,3 @@ git:
 
 esborra:
 	rm puzzles/$(p).graphml puzzles/$(p).sol.json
-	
