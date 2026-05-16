@@ -28,16 +28,12 @@ Per qué és útil:
 import sys
 import json
 import random
-import argparse
 import os
 
 # Importem les funcions dels nostres propis fitxers
 # IMPORTANT: graph.py ha d'existir a src/ i exportar build_graph()
-# IMPORTANT: puzzle.py ha d'existir a src/ i exportar:
-#              - canonicalize(puzzle) → puzzle en format canònic
-#              - is_solvable(puzzle)  → True/False
 from graph import build_graph
-from puzzle import canonicalize, is_solvable
+from puzzle import Puzzle
 
 # Importem la funció de puntuació d'eval.py
 # (la importem directament per no haver de cridar un subprocess)
@@ -76,6 +72,30 @@ FORMES_DISPONIBLES = [
 # -------------------------------------------------------------------------
 # GENERACIÓ D'UN PUZZLE A L'ATZAR
 # -------------------------------------------------------------------------
+
+def canonicalize(puzzle_dict: dict) -> dict:
+    pieces = puzzle_dict["pieces"]
+    start = puzzle_dict["start"]
+    pairs = list(zip(pieces, start))
+    indexed_pairs = list(enumerate(pairs))
+    indexed_pairs.sort(key=lambda x: x[1])
+    
+    new_pieces = []
+    new_start = []
+    old_to_new = {}
+    for new_idx, (old_idx, (piece, pos)) in enumerate(indexed_pairs):
+        new_pieces.append(piece)
+        new_start.append(pos)
+        old_to_new[old_idx] = new_idx
+        
+    new_goals = []
+    for g in puzzle_dict.get("goals", []):
+        new_goals.append({"i": old_to_new[g["i"]], "pos": g["pos"]})
+    
+    puzzle_dict["pieces"] = new_pieces
+    puzzle_dict["start"] = new_start
+    puzzle_dict["goals"] = sorted(new_goals, key=lambda g: (g["i"], g["pos"]))
+    return puzzle_dict
 
 def genera_puzzle_aleatori(W, H, n_peces_min=3, n_peces_max=6):
     """
@@ -164,7 +184,7 @@ def genera_puzzle_aleatori(W, H, n_peces_min=3, n_peces_max=6):
 # AVALUACIÓ D'UN PUZZLE GENERAT
 # -------------------------------------------------------------------------
 
-def avalua_puzzle(puzzle):
+def avalua_puzzle(puzzle_dict):
     """
     Construeix el graf del puzzle i en calcula la puntuació.
 
@@ -172,27 +192,23 @@ def avalua_puzzle(puzzle):
         (puntuació, detalls) on puntuació és un float entre 0 i 5,
         o (0.0, {}) si el puzzle no és resoluble o hi ha algun error.
     """
-    try:
-        # Primer comprovem si el puzzle és resoluble (evitem grafs inútils)
-        # IMPORTANT: is_solvable() ha d'estar definida a puzzle.py
-        if not is_solvable(puzzle):
-            return 0.0, {}
+    # Convertim el diccionari al format d'objecte Puzzle del projecte
+    puzzle_obj = Puzzle.from_json(json.dumps(puzzle_dict))
 
-        # Construïm el graf de l'espai d'estats
-        graf, node_inici, nodes_objectiu = build_graph(puzzle)
+    # Construïm el graf de l'espai d'estats
+    graf = build_graph(puzzle_obj)
+    
+    # Extraiem el node inicial i els nodes objectiu
+    node_inici = next(v for v in graf.vertices() if graf.vp["is_start"][v])
+    nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]
 
-        # Si no hi ha estats objectiu accessibles, puntuació 0
-        if not nodes_objectiu:
-            return 0.0, {}
-
-        # Calculem la puntuació
-        puntuacio, detalls = puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu)
-        return puntuacio, detalls
-
-    except Exception as error:
-        # Si hi ha algun error inesperat, continuem sense trencar el programa
-        print(f"  [error avaluant puzzle: {error}]")
+    # Si no hi ha estats objectiu accessibles, puntuació 0
+    if not nodes_objectiu:
         return 0.0, {}
+
+    # Calculem la puntuació
+    puntuacio, detalls = puntua_puzzle(puzzle_obj, graf, node_inici, nodes_objectiu)
+    return puntuacio, detalls
 
 
 # -------------------------------------------------------------------------
@@ -200,48 +216,35 @@ def avalua_puzzle(puzzle):
 # -------------------------------------------------------------------------
 
 def main():
-    # Configurem els arguments de la línia de comandes
-    parser = argparse.ArgumentParser(
-        description="Genera puzzles de Klotski a l'atzar i selecciona els millors"
-    )
-    parser.add_argument(
-        "--num", type=int, default=20,
-        help="Quants puzzles generar en total (per defecte: 20)"
-    )
-    parser.add_argument(
-        "--millors", type=int, default=3,
-        help="Quants dels millors guardar (per defecte: 3)"
-    )
-    parser.add_argument(
-        "--sortida", type=str, default="puzzles/generats/",
-        help="On guardar els puzzles (per defecte: puzzles/generats/)"
-    )
-    parser.add_argument(
-        "--W", type=int, default=4,
-        help="Amplada del taulell (per defecte: 4)"
-    )
-    parser.add_argument(
-        "--H", type=int, default=5,
-        help="Alçada del taulell (per defecte: 5)"
-    )
+    # Valors per defecte
+    num = 20
+    millors = 3
+    sortida = "puzzles/generats/"
+    W = 4
+    H = 5
 
-    args = parser.parse_args()
+    # Llegim arguments si ens els passen (python generate.py num millors sortida W H)
+    if len(sys.argv) > 1: num = int(sys.argv[1])
+    if len(sys.argv) > 2: millors = int(sys.argv[2])
+    if len(sys.argv) > 3: sortida = sys.argv[3]
+    if len(sys.argv) > 4: W = int(sys.argv[4])
+    if len(sys.argv) > 5: H = int(sys.argv[5])
 
     # Creem el directori de sortida si no existeix
-    os.makedirs(args.sortida, exist_ok=True)
+    os.makedirs(sortida, exist_ok=True)
 
-    print(f"Generant {args.num} puzzles de {args.W}×{args.H}...")
-    print(f"Guardarem els {args.millors} millors a: {args.sortida}")
+    print(f"Generant {num} puzzles de {W}×{H}...")
+    print(f"Guardarem els {millors} millors a: {sortida}")
     print()
 
     # Llista de (puntuació, puzzle) per ordenar al final
     resultats = []
 
-    for i in range(args.num):
-        print(f"  Puzzle {i+1}/{args.num}: ", end="", flush=True)
+    for i in range(num):
+        print(f"  Puzzle {i+1}/{num}: ", end="", flush=True)
 
         # Pas 1: Generem un puzzle
-        puzzle = genera_puzzle_aleatori(args.W, args.H)
+        puzzle = genera_puzzle_aleatori(W, H)
 
         if puzzle is None:
             print("no s'ha pogut generar")
@@ -260,13 +263,13 @@ def main():
     # Pas 4: Guardem els M millors
     print()
     print(f"─" * 40)
-    print(f"  TOP {args.millors} PUZZLES GENERATS")
+    print(f"  TOP {millors} PUZZLES GENERATS")
     print(f"─" * 40)
 
     n_guardats = 0
-    for rang, (puntuacio, puzzle) in enumerate(resultats[:args.millors]):
+    for rang, (puntuacio, puzzle) in enumerate(resultats[:millors]):
         nom_fitxer = f"generat_{rang+1:02d}.json"
-        ruta = os.path.join(args.sortida, nom_fitxer)
+        ruta = os.path.join(sortida, nom_fitxer)
 
         with open(ruta, "w") as f:
             json.dump(puzzle, f, indent=2)

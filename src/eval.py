@@ -30,11 +30,9 @@ from graph_tool.all import (
     pseudo_diameter,
 )
 
-# Importem les funcions del nostre propi codi del projecte
-# IMPORTANT: graph.py ha d'existir a src/ i exportar build_graph()
-# IMPORTANT: puzzle.py ha d'existir a src/ i exportar load_puzzle() i find_goal_states()
 from graph import build_graph
-from puzzle import load_puzzle, find_goal_states
+from puzzle import Puzzle
+from pathlib import Path
 
 
 # -------------------------------------------------------------------------
@@ -204,12 +202,16 @@ def main():
 
     # Pas 1: Carreguem el puzzle des del fitxer JSON
     print(f"Carregant puzzle: {fitxer}")
-    puzzle = load_puzzle(fitxer)
+    puzzle = Puzzle.from_json(Path(fitxer).read_text())
 
     # Pas 2: Construïm el graf de l'espai d'estats
     # build_graph fa una exploració DFS/BFS de tots els estats possibles
     print("Construint el graf d'estats (pot trigar uns segons)...")
-    graf, node_inici, nodes_objectiu = build_graph(puzzle)
+    graf = build_graph(puzzle)
+    
+    # Extraiem el node inicial i els nodes objectiu
+    node_inici = next(v for v in graf.vertices() if graf.vp["is_start"][v])
+    nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]
 
     print(f"  → {graf.num_vertices()} estats (nodes)")
     print(f"  → {graf.num_edges()} transicions (arestes)")

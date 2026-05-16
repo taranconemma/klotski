@@ -17,6 +17,9 @@ gif:
 play: 
 	pixi run python src/play.py puzzles/$(p).json
 
+eval:
+	pixi run python src/eval.py puzzles/$(p).json
+
 descarrega:
 	pixi run python src/download.py
 
