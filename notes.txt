@@ -41,3 +41,6 @@ incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a
  l'estat on no hi és poguessin considerar-se el mateix node al graf, fent que el puzzle es marqués 
  com a resolt quan no ho estava. La correcció exclou les peces objectiu de l'intercanvi, de manera 
  que només les peces secundàries iguals es col·lapsen.
+
+
+ IMPORTANTE: no subir los graphs.html porque revientan el github
