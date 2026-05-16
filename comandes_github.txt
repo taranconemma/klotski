@@ -1,0 +1,172 @@
+╔══════════════════════════════════════════════════════════════════╗
+║              COMANDES GITHUB — PROJECTE KLOTSKI                  ║
+║                    Pràctica 2 d'AP2, 2026                        ║
+╚══════════════════════════════════════════════════════════════════╝
+
+
+════════════════════════════════════════
+  1. CONFIGURACIÓ INICIAL (només 1 cop)
+════════════════════════════════════════
+
+  Configurar el teu nom i correu a Git:
+
+    git config --global user.name "El teu nom"
+    git config --global user.email "el.teu.correu@estudiantat.upc.edu"
+
+
+  Crear el fitxer .gitignore per NO pujar coses pesades:
+
+    cat > .gitignore << 'EOF'
+    .pixi/
+    __pycache__/
+    *.pyc
+    *.graphml
+    *.sol.json
+    *.gif
+    *.png
+    *.pdf
+    EOF
+
+  ⚠️  MUY IMPORTANT: la carpeta .pixi pesa 1.3GB.
+      Assegura't que surt al .gitignore ABANS de fer cap commit!
+
+
+════════════════════════════════════════
+  2. CREAR EL REPOSITORI (primera vegada)
+════════════════════════════════════════
+
+  Opció A — Des de GitHub web (recomanat):
+  ─────────────────────────────────────────
+    1. Ves a https://github.com/new
+    2. Posa un nom al repositori (ex: klotski-ap2)
+    3. Marca-ho com a PRIVAT (per no compartir el codi!)
+    4. NO inicialitzis amb README (ja en tens un)
+    5. Copia la URL que et dóna GitHub
+
+  Opció B — Des de la terminal amb GitHub CLI:
+  ─────────────────────────────────────────────
+    gh repo create klotski-ap2 --private --source=. --remote=origin
+
+
+════════════════════════════════════════
+  3. PUJAR EL PROJECTE PER PRIMERA VEGADA
+════════════════════════════════════════
+
+  Des de la carpeta arrel del projecte (on hi ha els .py):
+
+    git init
+    git add .
+    git status                          ← comprova que .pixi NO hi és!
+    git commit -m "Commit inicial del projecte Klotski"
+    git branch -M main
+    git remote add origin https://github.com/USUARI/klotski-ap2.git
+    git push -u origin main
+
+
+════════════════════════════════════════
+  4. FLUX DE TREBALL HABITUAL
+════════════════════════════════════════
+
+  Cada cop que vols guardar canvis nous:
+
+    git status                          ← veure quins fitxers han canviat
+    git add .                           ← afegir tots els canvis
+    git add src/graph.py                ← o afegir un fitxer concret
+    git commit -m "Descripció breu del que has fet"
+    git push                            ← pujar a GitHub
+
+
+  Exemples de missatges de commit útils:
+    "Implementar graph.py amb BFS complet"
+    "Afegir solve.py amb shortest_distance de graph-tool"
+    "Corregir bug a logic.py en can_move amb parets"
+    "Afegir eval.py amb mesures de diàmetre i modularitat"
+    "Implementar generate.py amb generació aleatoria validada"
+
+
+════════════════════════════════════════
+  5. VEURE L'ESTAT DEL REPOSITORI
+════════════════════════════════════════
+
+    git status                          ← fitxers modificats/nous
+    git log --oneline                   ← historial de commits (compacte)
+    git log --oneline --graph           ← historial amb branques visuals
+    git diff                            ← veure canvis no afegits encara
+    git diff --staged                   ← veure canvis afegits (staged)
+
+
+════════════════════════════════════════
+  6. SI ET VAS EQUIVOCAR
+════════════════════════════════════════
+
+  Desfer l'últim add (sense perdre els canvis):
+    git restore --staged .
+
+  Desfer canvis en un fitxer (⚠️ es perden els canvis!):
+    git restore src/graph.py
+
+  Modificar el missatge de l'últim commit (abans de fer push):
+    git commit --amend -m "Missatge corregit"
+
+  Si vas afegir .pixi per accident ABANS de crear el .gitignore:
+    git rm -r --cached .pixi/
+    git commit -m "Eliminar .pixi del tracking"
+
+
+════════════════════════════════════════
+  7. CLONAR EL REPOSITORI EN UN ALTRE ORDINADOR
+════════════════════════════════════════
+
+    git clone https://github.com/USUARI/klotski-ap2.git
+    cd klotski-ap2
+    pixi install                        ← reinstal·lar les dependències
+
+
+════════════════════════════════════════
+  8. TREBALLAR AMB BRANQUES (opcional però recomanat)
+════════════════════════════════════════
+
+  Crear una branca nova per una funcionalitat:
+    git checkout -b feature/eval
+
+  Tornar a la branca principal:
+    git checkout main
+
+  Fusionar la branca quan estigui llesta:
+    git merge feature/eval
+
+  Pujar la branca a GitHub:
+    git push origin feature/eval
+
+
+════════════════════════════════════════
+  9. RESUM RÀPID DEL DIA A DIA
+════════════════════════════════════════
+
+    git add .
+    git commit -m "missatge"
+    git push
+
+    ← Això és tot el que necessites la majoria de dies!
+
+
+════════════════════════════════════════
+  10. RECORDATORI ESTRUCTURA DEL PROJECTE
+════════════════════════════════════════
+
+  Fitxers que SÍ han d'anar a GitHub:
+    ✔  *.py  (tot el codi)
+    ✔  README.md
+    ✔  sample1.json  (puzzles d'exemple)
+    ✔  .gitignore
+    ✔  pixi.toml  (si existeix, per reproduir l'entorn)
+
+  Fitxers que NO han d'anar a GitHub:
+    ✗  .pixi/           (1.3GB de dependències, es regenera amb pixi install)
+    ✗  __pycache__/     (fitxers compilats de Python)
+    ✗  *.graphml        (grafs generats, poden pesar molt)
+    ✗  *.sol.json       (solucions generades)
+    ✗  *.gif / *.png    (imatges generades)
+
+══════════════════════════════════════════════════════════════════════
+
