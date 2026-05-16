@@ -1,10 +1,7 @@
-# eval.py. Avalua un puzzle donat en .json.
-
-
 """
-eval.py — Avalua l'interès d'un puzzle de Klotski
+eval.py — Avalua l'interès d'un puzzle de Klotski donat en .json.
 
-Uso:
+Utilització:
     python src/eval.py puzzles/klotski.json
 
 Què fa:
@@ -17,11 +14,10 @@ Per qué és útil:
     No tots els puzzles generats a l'atzar són interessants.
     Volem puzzles que tinguin molts estats possibles, que la solució
     sigui llarga i que hi hagi "zones" diferenciades (fases del puzzle).
-    Les mesures de graf ens ho diuen de forma objectiva.
+    Les mesures de graf ens ho diuen de forma prou objectiva.
 """
 
 import sys
-import json
 import math
 
 # graph-tool és la llibreria de grafs del projecte
@@ -105,7 +101,7 @@ def mesura_components_connexes(graf):
 
     Si el graf té una sola component, tots els estats es poden assolir.
     Un puzzle amb molts estats accessibles des de l'inici és millor.
-    Però si hi ha MOLTES components petites, pot ser senyal de fragments
+    Però si hi ha moltes components petites, pot ser senyal de fragments
     desconnectats poc interessants.
 
     Per tant: penalitzem si hi ha moltes components petites,
@@ -160,7 +156,7 @@ def mesura_diametre(graf):
 # FUNCIÓ PRINCIPAL DE PUNTUACIÓ
 # -------------------------------------------------------------------------
 
-def puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu):
+def puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu) -> tuple[float, dict[str, float]]:
     """
     Combina les quatre mesures en una puntuació final entre 0 i 5.
 
@@ -172,6 +168,8 @@ def puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu):
 
     La longitud de la solució pesa més perquè és el criteri
     més directament relacionat amb la dificultat percebuda.
+
+    Retorna una tupla amb la puntuació final i un diccionari amb les quatre mesures.
     """
     m1 = mesura_nombre_estats(graf)
     m2 = mesura_longitud_solucio(graf, node_inici, nodes_objectiu)
