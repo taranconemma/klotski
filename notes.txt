@@ -29,3 +29,15 @@ Para crear el repositorio de github:
 git add src/graph.py src/solve.py
 git commit -m "Afegir graph.py i solve.py"
 git push origin main
+
+
+
+El primer codigo que me habia hehco claude dibujaba el grafo arbol que encontraba el bfs 
+pero i si a mi me interesa con todas sus aristas??
+
+
+state_key colapsava tots els estats on peces de la mateixa forma estaven intercanviades, 
+incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a la posició final i
+ l'estat on no hi és poguessin considerar-se el mateix node al graf, fent que el puzzle es marqués 
+ com a resolt quan no ho estava. La correcció exclou les peces objectiu de l'intercanvi, de manera 
+ que només les peces secundàries iguals es col·lapsen.

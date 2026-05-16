@@ -34,13 +34,23 @@ def state_key(puzzle: Puzzle, state: State) -> StateKey:
     Peces amb la mateixa forma s'ordenen per posició, de manera que
     estats que només difereixen en l'intercanvi de peces iguals
     tenen la mateixa clau.
+    
+    Aquesta optimització redueix el nombre de nodes en un factor exacte de k!
+    (on k és el nombre de peces no-objectiu iguals). Això és així perquè, en ser
+    indistingibles, passem de comptar les posicions com a permutacions P(n,k) a
+    comptar-les com a combinacions C(n,k). La relació P(n,k) = C(n,k) * k! demostra
+    que eliminem exactament les k! formes redundants d'ordenar aquestes peces.
     """
     positions = list(state.positions) #ho hem de fer mutable
+
+    # Excloem les peces objectiu perquè intercanviar-les amb d'altres faria que es detectessin victòries falses al puzzle.
+    goal_indices: set[int] = {i for i, _ in puzzle.goals}
 
     # Agrupa els índexs de peces per forma
     groups: dict[Piece, list[int]] = {} #la llista conté els indexs de les peces que son iguals que la clau
     for i, piece in enumerate(puzzle.pieces):
-        groups.setdefault(piece, []).append(i) #posem totes les peces al diccionari inicialitzant la llista quan veiem una per primer cop
+        if i not in goal_indices:
+            groups.setdefault(piece, []).append(i) #posem totes les peces al diccionari inicialitzant la llista quan veiem una per primer cop
 
     # Dins de cada grup, ordena les posicions
     for indices in groups.values():
@@ -108,10 +118,12 @@ def build_graph(puzzle: Puzzle) -> Graph:
 
     queue: deque[State] = deque([puzzle.start])
     visited: set[StateKey] = {state_key(puzzle, puzzle.start)}
+    added_edges: set[tuple[StateKey, StateKey]] = set()
 
     while queue:
         current = queue.popleft()
-        current_v = key_to_v[state_key(puzzle, current)]
+        current_key = state_key(puzzle, current)
+        current_v = key_to_v[current_key]
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
             next_state = apply_move(puzzle, current, (piece_idx, direction, dist))
@@ -119,13 +131,17 @@ def build_graph(puzzle: Puzzle) -> Graph:
 
             next_v = get_or_create(next_state)
 
-            if next_key not in visited:
-                visited.add(next_key)
-                queue.append(next_state)
+            edge_key = tuple(sorted((current_key, next_key)))
+            if edge_key not in added_edges:
+                added_edges.add(edge_key)
                 e = g.add_edge(current_v, next_v)
                 ep_piece[e]     = piece_idx
                 ep_direction[e] = direction
                 ep_distance[e]  = dist
+
+            if next_key not in visited:
+                visited.add(next_key)
+                queue.append(next_state)
 
     # Registrar propietats al graf
     g.vertex_properties["state"]    = vp_state

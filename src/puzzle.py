@@ -157,6 +157,8 @@ class Puzzle:
     def from_json(cls, s: str) -> Puzzle:
         """Crea un Puzzle a partir d'un string JSON."""
         obj = json.loads(s)
+        if "puzzle" in obj:
+            obj = obj["puzzle"]
         walls = tuple(tuple(c) for c in obj["walls"])
         pieces = tuple(Piece(*[tuple(c) for c in coords]) for coords in obj["pieces"])
         start = State(tuple(tuple(p) for p in obj["start"]))
