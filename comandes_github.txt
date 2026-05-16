@@ -170,3 +170,88 @@
 
 ══════════════════════════════════════════════════════════════════════
 
+════════════════════════════════════════
+  11. BRANQUES — PER QUÈ SERVEIXEN?
+════════════════════════════════════════
+
+  Imagina que `main` és el codi que "funciona".
+  Les branques son còpies on pots experimentar sense trencar res.
+  Quan acaba bé, ho fusiones a `main`.
+
+
+════════════════════════════════════════
+  12. FLUX AMB BRANQUES
+════════════════════════════════════════
+
+  Crear una branca nova i situar-te a ella:
+    git checkout -b feature/eval
+
+  Treballes normal... add, commit, push:
+    git add .
+    git commit -m "Afegir eval.py"
+    git push origin feature/eval
+
+  Quan estigui llest, tornes a main i fusiones:
+    git checkout main
+    git merge feature/eval
+
+  Esborrar la branca ja no necessària (opcional):
+    git branch -d feature/eval
+
+
+════════════════════════════════════════
+  13. MOURE'T ENTRE BRANQUES
+════════════════════════════════════════
+
+  Veure en quina branca estàs ara:
+    git branch
+
+  Llistat de totes les branques (locals i remotes):
+    git branch -a
+
+  Anar a main:
+    git checkout main
+
+  Anar a la teva branca:
+    git checkout feature/eval
+
+  ⚠️  Abans de canviar de branca, fes sempre commit o stash
+      dels teus canvis, si no Git et donarà error!
+
+  Si tens canvis a mig fer i necessites canviar de branca:
+    git stash                   ← guarda els canvis temporalment
+    git checkout main           ← canvies de branca
+    git checkout feature/eval   ← tornes a la teva branca
+    git stash pop               ← recuperes els canvis
+
+
+════════════════════════════════════════
+  14. DESCARREGAR CANVIS D'UNA ALTRA PERSONA
+════════════════════════════════════════
+
+  Baixar tots els canvis del repositori remot:
+    git pull
+
+  Si l'altra persona ha treballat a una branca diferent:
+    git branch -a               ← veure totes les branques remotes
+    git checkout nom-branca     ← situar-te a la seva branca
+
+
+════════════════════════════════════════
+  15. CAS MÉS COMÚ — dues persones a main
+════════════════════════════════════════
+
+  Abans de posar-te a treballar, SEMPRE:
+    git pull                    ← baixa els canvis de l'altra persona
+
+  ... treballes ...
+
+    git add .
+    git commit -m "missatge"
+    git push
+
+  ⚠️  Si les dues heu tocat el MATEIX fitxer → conflicte,
+      haureu de resoldre'l manualment.
+      Si cadascú toca fitxers diferents → cap problema!
+
+══════════════════════════════════════════════════════════════════════
