@@ -24,3 +24,7 @@ git:
 	git add .
 	git commit -m "$(m)"
 	git push origin main
+
+esborra:
+	rm puzzles/$(p).graphml puzzles/$(p).sol.json
+	
