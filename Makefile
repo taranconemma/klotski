@@ -1,4 +1,4 @@
-all: crea
+all: crea_graf_i_sol
 
 crea_graf_i_sol: 
 	pixi run python src/graph.py puzzles/sample1.json

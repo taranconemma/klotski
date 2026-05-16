@@ -19,40 +19,39 @@ import sys
 from collections import deque
 from pathlib import Path
 
-import graph_tool.all as gt  # type: ignore[import-untyped]
+from graph_tool.all import * #importem directament les funcions que utilitzarem
 
 from logic import possible_moves, apply_move, is_goal
-from puzzle import Puzzle, State
+from puzzle import Puzzle, State, Piece, Coord
 
 # Tipus per a la clau canònica d'un estat (hashable)
-StateKey = tuple[tuple[int, int], ...]
+StateKey = tuple[Coord, ...]
 
 
 def state_key(puzzle: Puzzle, state: State) -> StateKey:
     """
-    Retorna una clau hashable que identifica unívocament un estat.
+    Retorna una clau que identifica un estat.
     Peces amb la mateixa forma s'ordenen per posició, de manera que
     estats que només difereixen en l'intercanvi de peces iguals
     tenen la mateixa clau.
     """
-    positions = list(state.positions)
+    positions = list(state.positions) #ho hem de fer mutable
 
     # Agrupa els índexs de peces per forma
-    groups: dict[Piece, list[int]] = {}
+    groups: dict[Piece, list[int]] = {} #la llista conté els indexs de les peces que son iguals que la clau
     for i, piece in enumerate(puzzle.pieces):
-        groups.setdefault(piece, []).append(i)
+        groups.setdefault(piece, []).append(i) #posem totes les peces al diccionari inicialitzant la llista quan veiem una per primer cop
 
     # Dins de cada grup, ordena les posicions
-    result = list(positions)
     for indices in groups.values():
-        sorted_positions = sorted(positions[i] for i in indices)
-        for i, pos in zip(indices, sorted_positions):
-            result[i] = pos
+        sorted_positions = sorted(positions[i] for i in indices) #ordenem les posicions de les peces repetides perquè l'estat que queda sempre sigui el mateix si hi ha peces iguals intercambiades
+        for i, pos in zip(indices, sorted_positions):            #ordenem per la coordenada x i si hi ha empat per la y
+            positions[i] = pos #com que anem agafant els indexos a partir del diccionari sabem que tots els que ordenem i posem son peces iguals
 
-    return tuple(result)
+    return tuple(positions)
 
 
-def build_graph(puzzle: Puzzle) -> gt.Graph:
+def build_graph(puzzle: Puzzle) -> Graph:
     """
     Construeix el graf d'estats del puzzle amb BFS.
 
@@ -69,27 +68,32 @@ def build_graph(puzzle: Puzzle) -> gt.Graph:
     Propietat global del graf:
         puzzle - JSON del puzzle (per poder-lo recuperar des de 3D_view.py)
     """
-    g = gt.Graph(directed=False)
-
-    # Propietats dels nodes
-    vp_state    = g.new_vertex_property("object")
-    vp_is_start = g.new_vertex_property("bool")
+    g = Graph(directed=False) #fem servir el 'tipus' Graph del mòdul graph_tool per facilitar la visulitzacióposterior amb 3D_view.py
+    
+    # Propietats dels nodes: cada node tindrà aquestes variables (son com atributs) i els hem de 'declarar'
+    vp_state    = g.new_vertex_property("object") 
+    vp_is_start = g.new_vertex_property("bool") 
     vp_is_goal  = g.new_vertex_property("bool")
 
-    # Propietats de les arestes
+    # Propietats de les arestes: el mateix que amb els nodes
     ep_piece     = g.new_edge_property("int")
     ep_direction = g.new_edge_property("string")
     ep_distance  = g.new_edge_property("int")
 
     # Propietat global: JSON del puzzle (necessari per 3D_view.py)
     gp_puzzle = g.new_graph_property("string")
-    gp_puzzle[g] = puzzle.to_json()
+    gp_puzzle[g] = puzzle.to_json() #a aquesta ja li assignem un valor
     g.graph_properties["puzzle"] = gp_puzzle
 
-    key_to_v: dict[StateKey, gt.Vertex] = {}
+    key_to_v: dict[StateKey, Vertex] = {}
 
-    def get_or_create(state: State) -> gt.Vertex:
-        k = state_key(puzzle, state)
+    def get_or_create(state: State) -> Vertex:
+        """
+        Retorna el vèrtex corresponent a un estat donat.
+        Si l'estat no ha estat visitat prèviament, crea un nou vèrtex al graf,
+        li assigna les propietats corresponents i l'afegeix al diccionari d'estats.
+        """
+        k = state_key(puzzle, state) #obtenim la clau que identifica estats sense diferenciar quan peces iguals estan intercambiades de lloc
         if k not in key_to_v:
             v = g.add_vertex()
             key_to_v[k] = v
@@ -134,7 +138,7 @@ def build_graph(puzzle: Puzzle) -> gt.Graph:
     return g
 
 
-def print_summary(puzzle: Puzzle, g: gt.Graph) -> None:
+def print_summary(puzzle: Puzzle, g: Graph) -> None:
     n_goals = sum(1 for v in g.vertices() if g.vp["is_goal"][v])
     print(f"Taulell:         {puzzle.W}×{puzzle.H}")
     print(f"Peces:           {len(puzzle.pieces)}")
