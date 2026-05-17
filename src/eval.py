@@ -204,10 +204,16 @@ def main(fitxer=None):
     print(f"Carregant puzzle: {fitxer}")
     puzzle = Puzzle.from_json(Path(fitxer).read_text())
 
-    # Pas 2: Construïm el graf de l'espai d'estats
-    # build_graph fa una exploració DFS/BFS de tots els estats possibles
-    print("Construint el graf d'estats (pot trigar uns segons)...")
-    graf = build_graph(puzzle)
+    # Pas 2: Construïm o carreguem el graf de l'espai d'estats
+    graphml_path = Path(fitxer).with_suffix(".graphml")
+    
+    if graphml_path.exists():
+        print(f"Carregant el graf existent des de {graphml_path}...")
+        import graph_tool.all as gt
+        graf = gt.load_graph(str(graphml_path))
+    else:
+        print("Construint el graf d'estats (pot trigar uns segons)...")
+        graf = build_graph(puzzle)
     
     # Extraiem el node inicial i els nodes objectiu
     node_inici = next(v for v in graf.vertices() if graf.vp["is_start"][v])

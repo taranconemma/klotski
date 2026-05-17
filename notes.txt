@@ -44,3 +44,22 @@ incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a
 
 
  IMPORTANTE: no subir los graphs.html porque revientan el github
+
+
+ En descarregar els puzzles des de l'API, el servidor els identifica amb un ID llarg i difícil de 
+ manejar (ex: f158a3b...). Per treballar-hi còmodament des del terminal, download.py els desa a 
+ puzzles/downloads/ amb noms numèrics curts (00.json, 01.json...). Per no perdre la connexió entre 
+ aquest número i l'identificador original que el servidor necessita per enviar valoracions, el programa 
+ genera també un fitxer index.json que actua com a diccionari. Així, es guanya comoditat al llançar 
+ comandes com python solve.py puzzles/downloads/01.json, mentre que per sota, rate.py pot consultar 
+ silenciosament l'index.json per saber quin ID real li correspon a aquell índex curt.
+
+
+ Construir el graf d'un puzzle és l'operació computacionalment més costosa del projecte: en puzzles
+ grans pot trigar minuts. Per evitar repetir aquest càlcul innecessàriament, graph.py exposa la funció 
+ carregar_o_construir_graf, que comprova si el fitxer .graphml ja existeix al disc abans de fer res. 
+ Si existeix, el carrega directament en memòria en mil·lisegons; si no, el construeix i el desa 
+ automàticament per a usos futurs. Les eines solve.py i eval.py usen aquesta mateixa funció com a 
+ porta d'entrada, de manera que executar múltiples operacions seguides sobre un mateix puzzle 
+ (resoldre'l, avaluar-lo, visualitzar-lo) és gairebé instantani un cop el graf s'ha construït la 
+ primera vegada. Per forçar una reconstrucció, totes les eines accepten l'argument --forçar.

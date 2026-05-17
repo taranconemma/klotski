@@ -177,6 +177,11 @@ if __name__ == "__main__":
     else:
         output_path = json_path.with_suffix(".graphml")
 
+    if output_path.exists():
+        print(f"✅ El graf ja existeix: {output_path}")
+        print("   (Ometent la construcció...)")
+        sys.exit(0)
+
     print(f"Construint el graf per: {json_path}")
     g = build_graph(puzzle)
     print_summary(puzzle, g)

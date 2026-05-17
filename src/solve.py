@@ -96,6 +96,11 @@ if __name__ == "__main__":
     else:
         output_path = graphml_path.with_suffix("").with_suffix(".sol.json")
 
+    if output_path.exists():
+        print(f"✅ La solució ja existeix: {output_path}")
+        print("   (Ometent la cerca...)")
+        sys.exit(0)
+
     print(f"Carregant graf: {graphml_path}")
     g = gt.load_graph(str(graphml_path))
     print(f"Nodes: {g.num_vertices()}, Arestes: {g.num_edges()}")
