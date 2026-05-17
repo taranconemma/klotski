@@ -192,13 +192,13 @@ def puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu) -> tuple[float, dict
 # PROGRAMA PRINCIPAL
 # -------------------------------------------------------------------------
 
-def main():
-    # Comprovem que ens han passat un fitxer com a argument
-    if len(sys.argv) != 2:
-        print("Uso: python src/eval.py <fitxer_puzzle.json>")
-        sys.exit(1)
-
-    fitxer = sys.argv[1]
+def main(fitxer=None):
+    # Comprovem que ens han passat un fitxer com a argument o per paràmetre
+    if fitxer is None:
+        if len(sys.argv) != 2:
+            print("Uso: python src/eval.py <fitxer_puzzle.json>")
+            sys.exit(1)
+        fitxer = sys.argv[1]
 
     # Pas 1: Carreguem el puzzle des del fitxer JSON
     print(f"Carregant puzzle: {fitxer}")

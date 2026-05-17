@@ -3,6 +3,7 @@ Entonces es mejor un dfs o bfs (si queremos pasos minimos)
 
 que es esto del parser
 hay que usar Astar??
+preguntar que criterios han usado para el eval???
 creo que el graph se necesta para evaluar para el solve basta con un astar
 
 Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
@@ -22,7 +23,7 @@ Mensaje Lola: holaa, sé que queda molt pero per anar-me organitzant
             A les 15:00 o així fins a les 17:00 si vols fer 2 hores? Perquè m'estan demanant fer altres classe i si no no em donaria temps
             Si no et va bé em dius i miro d'organitzar-ho direfent. 
 
-Mensaje Ricard: holaa la classe de aquest dilluns com la de sempre i la del 25 et va bé fer de 17:00 a 19:00?? 
+Mensaje Ricard: holaa la classe de aquest dilluns com la de sempre i la del 25 et va bé fer de 16:00 a 18:00?? 
                 La del dimarts 26 puc només de 17:45 a 19:15 si et va bé. 
 Preguntar si la Laia irá al tiro el 25 de mayo.
 Averiguar a qué hora hay que llegar al concierto y quien nos lleva? (Pone que empieza a las 20:30)
