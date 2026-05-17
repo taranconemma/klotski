@@ -1,0 +1,105 @@
+make rate_all
+pixi run python src/rate_all.py
+Analitzant 63 puzzles...
+
+  [01] Processant... nodes=186,504  sol=208  diam=413  ef=0.50  atzucacs=0.00%  → 4.63★
+  [02] Processant... nodes=7,558  sol=164  diam=179  ef=0.92  atzucacs=0.00%  → 4.91★
+  [03] Processant... nodes=76,056  sol=115  diam=865  ef=0.13  atzucacs=0.00%  → 4.35★
+  [04] Processant... nodes=52,602  sol=130  diam=221  ef=0.59  atzucacs=0.00%  → 4.69★
+  [05] Processant... ⏱️  TIMEOUT (més de 5 min) — puzzle massa gran, ometent.
+  [06] Processant... nodes=2,068  sol=63  diam=106  ef=0.59  atzucacs=0.00%  → 4.53★
+  [07] Processant... nodes=30,290  sol=70  diam=125  ef=0.56  atzucacs=0.00%  → 4.67★
+  [08] Processant... nodes=54,075  sol=127  diam=187  ef=0.68  atzucacs=0.00%  → 4.76★
+  [09] Processant... nodes=4,488  sol=54  diam=188  ef=0.29  atzucacs=0.00%  → 4.38★
+  [10] Processant... nodes=32,928  sol=96  diam=125  ef=0.77  atzucacs=0.00%  → 4.83★
+  [11] Processant... nodes=27,381  sol=76  diam=192  ef=0.40  atzucacs=0.00%  → 4.55★
+  [12] Processant... nodes=417,972  sol=199  diam=391  ef=0.51  atzucacs=0.00%  → 4.63★
+  [13] Processant... nodes=17,314  sol=76  diam=145  ef=0.52  atzucacs=0.00%  → 4.64★
+  [14] Processant... nodes=35,307  sol=62  diam=173  ef=0.36  atzucacs=0.00%  → 4.52★
+  [15] Processant... nodes=66,660  sol=243  diam=295  ef=0.82  atzucacs=0.00%  → 4.87★
+  [16] Processant... nodes=900,802  sol=55  diam=359  ef=0.15  atzucacs=0.00%  → 4.37★
+  [17] Processant... nodes=11,173  sol=60  diam=192  ef=0.31  atzucacs=0.00%  → 4.48★
+  [18] Processant... nodes=29,146  sol=52  diam=155  ef=0.34  atzucacs=0.00%  → 4.50★
+  [19] Processant... nodes=2,821  sol=31  diam=102  ef=0.30  atzucacs=0.00%  → 4.34★
+  [20] Processant... nodes=52,597  sol=37  diam=123  ef=0.30  atzucacs=0.00%  → 4.48★
+  [21] Processant... nodes=53,076  sol=32  diam=69  ef=0.46  atzucacs=0.00%  → 4.60★
+  [22] Processant... nodes=7,328  sol=45  diam=224  ef=0.20  atzucacs=0.00%  → 4.37★
+  [23] Processant... nodes=6,484  sol=56  diam=100  ef=0.56  atzucacs=0.00%  → 4.62★
+  [24] Processant... nodes=25,955  sol=126  diam=190  ef=0.66  atzucacs=0.00%  → 4.75★
+  [25] Processant... nodes=25,955  sol=126  diam=190  ef=0.66  atzucacs=0.00%  → 4.75★
+  [26] Processant... nodes=8,659  sol=52  diam=150  ef=0.35  atzucacs=0.00%  → 4.49★
+  [27] Processant... nodes=25,955  sol=126  diam=190  ef=0.66  atzucacs=0.00%  → 4.75★
+  [28] Processant... nodes=25,955  sol=126  diam=190  ef=0.66  atzucacs=0.00%  → 4.75★
+  [29] Processant... nodes=569,138  sol=52  diam=199  ef=0.26  atzucacs=0.00%  → 4.45★
+  [30] Processant... nodes=25,955  sol=116  diam=190  ef=0.61  atzucacs=0.00%  → 4.71★
+  [31] Processant... nodes=5,148  sol=44  diam=85  ef=0.52  atzucacs=0.00%  → 4.57★
+  [32] Processant... nodes=11,110  sol=98  diam=156  ef=0.63  atzucacs=0.00%  → 4.72★
+  [33] Processant... nodes=6,363  sol=185  diam=244  ef=0.76  atzucacs=0.00%  → 4.77★
+  [34] Processant... nodes=431  sol=29  diam=50  ef=0.58  atzucacs=0.00%  → 4.29★
+  [35] Processant... nodes=1,465  sol=41  diam=52  ef=0.79  atzucacs=0.00%  → 4.63★
+  [36] Processant... nodes=14,857  sol=27  diam=132  ef=0.20  atzucacs=0.00%  → 4.23★
+  [37] Processant... nodes=2,998  sol=28  diam=104  ef=0.27  atzucacs=0.00%  → 4.20★
+  [38] Processant... nodes=1,164  sol=28  diam=46  ef=0.61  atzucacs=0.00%  → 4.30★
+  [39] Processant... nodes=301,596  sol=133  diam=213  ef=0.62  atzucacs=0.00%  → 4.72★
+  [40] Processant... nodes=91,901  sol=47  diam=189  ef=0.25  atzucacs=0.00%  → 4.44★
+  [41] Processant... nodes=161  sol=31  diam=46  ef=0.67  atzucacs=0.00%  → 4.25★
+  [42] Processant... nodes=686  sol=31  diam=53  ef=0.58  atzucacs=0.00%  → 4.40★
+  [43] Processant... nodes=21,196  sol=25  diam=113  ef=0.22  atzucacs=0.00%  → 4.12★
+  [44] Processant... nodes=18,036  sol=14  diam=181  ef=0.08  atzucacs=0.00%  → 3.38★
+  [45] Processant... nodes=11,936  sol=18  diam=109  ef=0.17  atzucacs=0.00%  → 3.67★
+  [46] Processant... nodes=390  sol=22  diam=48  ef=0.46  atzucacs=0.00%  → 3.75★
+  [47] Processant... nodes=1,694  sol=18  diam=57  ef=0.32  atzucacs=0.00%  → 3.59★
+  [48] Processant... nodes=39,204  sol=18  diam=77  ef=0.23  atzucacs=0.00%  → 3.73★
+  [49] Processant... ❌  Puzzle invàlid (Les peces no estan en ordre canònic), ometent.
+  [50] Processant... nodes=140  sol=16  diam=23  ef=0.70  atzucacs=0.00%  → 3.09★
+  [51] Processant... nodes=2,057  sol=15  diam=63  ef=0.24  atzucacs=0.00%  → 3.38★
+  [52] Processant... nodes=10,464  sol=17  diam=55  ef=0.31  atzucacs=0.00%  → 3.72★
+  [53] Processant... nodes=1,331  sol=10  diam=71  ef=0.14  atzucacs=0.00%  → 2.97★
+  [54] Processant... ⏱️  TIMEOUT (més de 5 min) — puzzle massa gran, ometent.
+  [55] Processant... nodes=738  sol=9  diam=32  ef=0.28  atzucacs=0.00%  → 2.68★
+  [56] Processant... nodes=17,820  sol=10  diam=47  ef=0.21  atzucacs=0.00%  → 3.20★
+  [57] Processant... ❌  Puzzle invàlid (Les peces es solapen en l'estat inicial), ometent.
+  [58] Processant... nodes=16  sol=4  diam=6  ef=0.67  atzucacs=0.00%  → 1.88★
+  [59] Processant... nodes=12  sol=3  diam=5  ef=0.60  atzucacs=0.00%  → 1.73★
+  [60] Processant... nodes=232,560  sol=5  diam=30  ef=0.17  atzucacs=0.00%  → 2.62★
+  [61] Processant... nodes=546  sol=8  diam=37  ef=0.22  atzucacs=0.00%  → 2.62★
+  [62] Processant... nodes=333  sol=7  diam=32  ef=0.22  atzucacs=0.00%  → 2.43★
+  [63] Processant... nodes=202  sol=5  diam=29  ef=0.17  atzucacs=0.00%  → 2.18★
+
+✅ Estadístics desats a puzzles/downloads/calibracio.json
+✅ Puntuacions desades a puzzles/downloads/ratings.json
+
+══════════════════════════════════════════════════════════════════════
+  ANÀLISI DE CALIBRACIÓ DELS LLINDARS
+══════════════════════════════════════════════════════════════════════
+  MÈTRICA                ACTUAL   %TILE ACTUAL   PROPOSAT  DIAGNÒSTIC
+──────────────────────────────────────────────────────────────────────
+  Nombre d'estats        10,000          44.1%    110,822  ✅ BEN CALIBRAT
+  Moviments sol.             30          37.3%        131  ⚠️  MASSA EXIGENT (gairebé ningú arriba a 1.0)
+  Diàmetre                   50          20.3%        228  ⚠️  MASSA EXIGENT (gairebé ningú arriba a 1.0)
+══════════════════════════════════════════════════════════════════════
+
+══════════════════════════════════════════════════
+  DISTRIBUCIÓ DE PUNTUACIONS (puntuacio_recalibrada)
+══════════════════════════════════════════════════
+    0-1 ⭐                                      (0/59)
+    1-2 ⭐  █████████                           (9/59)
+    2-3 ⭐  █████████████████████               (21/59)
+    3-4 ⭐  ███████████████                     (15/59)
+    4-5 ⭐  ██████████████                      (14/59)
+    = 5 ⭐                                      (0/59)
+══════════════════════════════════════════════════
+
+══════════════════════════════════════════════════════════════════════
+  BLOC DE CODI PER COPIAR I ENGANXAR A eval.py
+  (calibrat el 2026-05-17 amb 59 puzzles)
+──────────────────────────────────────────────────────────────────────
+
+    # --- Calibració automàtica 2026-05-17 (59 puzzles) ---
+    max_esperat = 110,822   # mesura_nombre_estats()
+    max_esperat = 131   # mesura_longitud_solucio()
+    max_esperat = 228   # mesura_diametre()
+
+══════════════════════════════════════════════════════════════════════
+
+⚠️  Puzzles omesos per error: 05, 49, 54, 57

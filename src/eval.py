@@ -36,6 +36,17 @@ from pathlib import Path
 
 
 # -------------------------------------------------------------------------
+# LLINDARS DE CALIBRACIÓ  ← MODIFICA AQUESÎs VALORS AMB ELS DE rate_all.py
+# -------------------------------------------------------------------------
+# Quan executis 'make rate_all', el programa et dirà quins valors posar aquí.
+# El criteri és que el llindar correspongui al percentil 80-90 del teu conjunt
+# de puzzles, de manera que només el 10-20% més complex arribi a puntuació màxima.
+
+MAX_ESTATS:   int = 10_000   # nodes  (escala logarítmica)
+MAX_SOLUCIO:  int = 30       # moviments fins a la solució òptima
+MAX_DIAMETRE: int = 50       # pseudo-diàmetre del graf
+
+# -------------------------------------------------------------------------
 # MESURES D'INTERÈS
 # -------------------------------------------------------------------------
 # Cada funció rep el graf i informació del puzzle i retorna un valor entre
@@ -55,10 +66,8 @@ def mesura_nombre_estats(graf):
     if n == 0:
         return 0.0
 
-    # Escala log: log(n) / log(max_esperat)
-    # Assumim que un puzzle amb ~10.000 estats és "perfecte" en aquesta mesura
-    max_esperat = 10_000
-    valor = math.log(n + 1) / math.log(max_esperat + 1)
+    # Escala log: log(n) / log(MAX_ESTATS)
+    valor = math.log(n + 1) / math.log(MAX_ESTATS + 1)
 
     # Tallem a 1.0 per si és més gran del màxim esperat
     return min(valor, 1.0)
@@ -86,9 +95,8 @@ def mesura_longitud_solucio(graf, node_inici, nodes_objectiu):
         if int(distancies[node]) < 2**30  # 2^30 és "infinit" per graph-tool
     ) if nodes_objectiu else 0
 
-    # Normalitzem: 30 passos o més = puntuació màxima
-    max_esperat = 30
-    valor = dist_min / max_esperat
+    # Normalitzem: MAX_SOLUCIO passos o més = puntuació màxima
+    valor = dist_min / MAX_SOLUCIO
 
     return min(valor, 1.0)
 
@@ -143,11 +151,40 @@ def mesura_diametre(graf):
     # (el diàmetre exacte és molt lent de calcular)
     diametre, _ = pseudo_diameter(graf)
 
-    # Normalitzem: diàmetre de 50 o més = puntuació màxima
-    max_esperat = 50
-    valor = diametre / max_esperat
+    # Normalitzem: MAX_DIAMETRE o més = puntuació màxima
+    valor = diametre / MAX_DIAMETRE
 
     return min(valor, 1.0)
+
+
+def mesura_eficiencia_cami(graf, node_inici, nodes_objectiu) -> float:
+    """
+    Mesura 5: Eficiència del camí
+
+    Compara la longitud de la solució òptima amb el diàmetre total del graf.
+    La fórmula és: eficiència = moviments_solució / diàmetre
+
+    Un valor proper a 1.0 significa que per resoldre el puzzle cal recorre quasi
+    tot el que el puzzle permet: cada moviment compta i no hi ha dreceres.
+    Un valor proper a 0 indica que la solució és relativament curta respecte
+    a la profunditat total del graf (fàcil de trobar).
+
+    Retorna un valor entre 0.0 i 1.0
+    """
+    if graf.num_vertices() < 2 or not nodes_objectiu:
+        return 0.0
+
+    diametre, _ = pseudo_diameter(graf)
+    if diametre == 0:
+        return 0.0
+
+    distancies = shortest_distance(graf, source=node_inici)
+    dist_min = min(
+        int(distancies[node]) for node in nodes_objectiu
+        if int(distancies[node]) < 2**30
+    ) if nodes_objectiu else 0
+
+    return min(dist_min / diametre, 1.0)
 
 
 # -------------------------------------------------------------------------
@@ -156,35 +193,38 @@ def mesura_diametre(graf):
 
 def puntua_puzzle(puzzle, graf, node_inici, nodes_objectiu) -> tuple[float, dict[str, float]]:
     """
-    Combina les quatre mesures en una puntuació final entre 0 i 5.
+    Combina les cinc mesures en una puntuació final entre 0 i 5.
 
     Pesos de cada mesura (han de sumar 1.0):
         - Nombre d'estats:     20%  (complexitat general)
-        - Longitud solució:    40%  (dificultat principal)
-        - Component connexa:   20%  (accessibilitat)
-        - Diàmetre:            20%  (profunditat)
+        - Longitud solució:    35%  (dificultat principal)
+        - Component connexa:   15%  (accessibilitat)
+        - Diàmetre:            15%  (profunditat)
+        - Eficiència del camí: 15%  (exigència: solució vs. espai total)
 
     La longitud de la solució pesa més perquè és el criteri
     més directament relacionat amb la dificultat percebuda.
 
-    Retorna una tupla amb la puntuació final i un diccionari amb les quatre mesures.
+    Retorna una tupla amb la puntuació final i un diccionari amb les mesures.
     """
     m1 = mesura_nombre_estats(graf)
     m2 = mesura_longitud_solucio(graf, node_inici, nodes_objectiu)
     m3 = mesura_components_connexes(graf)
     m4 = mesura_diametre(graf)
+    m5 = mesura_eficiencia_cami(graf, node_inici, nodes_objectiu)
 
     # Combinació ponderada
-    puntuacio_0_1 = 0.20 * m1 + 0.40 * m2 + 0.20 * m3 + 0.20 * m4
+    puntuacio_0_1 = 0.20 * m1 + 0.35 * m2 + 0.15 * m3 + 0.15 * m4 + 0.15 * m5
 
     # Passem a escala 0–5
     puntuacio_final = puntuacio_0_1 * 5.0
 
     return puntuacio_final, {
-        "estats":    round(m1, 3),
-        "solucio":   round(m2, 3),
-        "connexio":  round(m3, 3),
-        "diametre":  round(m4, 3),
+        "estats":     round(m1, 3),
+        "solucio":    round(m2, 3),
+        "connexio":   round(m3, 3),
+        "diametre":   round(m4, 3),
+        "eficiencia": round(m5, 3),
     }
 
 
@@ -213,7 +253,11 @@ def main(fitxer=None):
         graf = gt.load_graph(str(graphml_path))
     else:
         print("Construint el graf d'estats (pot trigar uns segons)...")
-        graf = build_graph(puzzle)
+        try:
+            graf = build_graph(puzzle)
+        except TimeoutError as e:
+            print(f"\n⏱️  {e}")
+            sys.exit(1)
     
     # Extraiem el node inicial i els nodes objectiu
     node_inici = next(v for v in graf.vertices() if graf.vp["is_start"][v])
@@ -235,6 +279,7 @@ def main(fitxer=None):
     print(f"  Longitud solució (norm.): {detalls['solucio']:.3f}")
     print(f"  Fracció component gran:  {detalls['connexio']:.3f}")
     print(f"  Diàmetre (norm.):        {detalls['diametre']:.3f}")
+    print(f"  Eficiència del camí:     {detalls['eficiencia']:.3f}")
     print("─" * 40)
     estrelles = round(puntuacio * 2) / 2  # arrodoniment a 0.5 en 0.5
     print(f"  PUNTUACIÓ FINAL: {puntuacio:.2f} / 5.00  ({'⭐' * int(estrelles)})")

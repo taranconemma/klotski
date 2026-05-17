@@ -5,6 +5,13 @@ que es esto del parser
 hay que usar Astar??
 preguntar que criterios han usado para el eval???
 creo que el graph se necesta para evaluar para el solve basta con un astar
+Tema del timeout????
+mirar si se esta aprovechando bien todas las cosas del graph.tools -> RESOLT (s'ha optimitzat solve.py usant shortest_path natiu en C++ de graph-tool)
+ejemplos para justificar el eval
+mirar todos los sitios donde deberia ir un type alias
+el graf solo tiene nnodos a los que se puede llegar, por tanto en el solve deberia tener en cuenta nodos con distancias infinitas?
+como que graph tools es mas rapido con el shortest_path solo porque esta implementado en C++ y es 30 veces mas rapido calcular todas las distancias que hacer un bfs de toda la vida
+el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
 
 Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
 

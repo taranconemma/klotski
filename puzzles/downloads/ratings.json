@@ -1,0 +1,946 @@
+{
+    "01": {
+        "id_real": "c2ada9aa25284e001614f9a06c5677ea7b0c2144abe8fe0df693ce44aba6f3b4",
+        "metriques": {
+            "num_nodes": 186504,
+            "num_arestes": 374269,
+            "num_goals": 14691,
+            "moviments_solucio": 208,
+            "diametre": 413,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.0135,
+            "eficiencia_cami": 0.5036
+        },
+        "puntuacio_original": 4.628,
+        "puntuacio_recalibrada": 4.628
+    },
+    "02": {
+        "id_real": "9f2eb1f706759436c84c95bd06c3f22d78513610a0f246f4b60a9925faeb4a24",
+        "metriques": {
+            "num_nodes": 7558,
+            "num_arestes": 14185,
+            "num_goals": 48,
+            "moviments_solucio": 164,
+            "diametre": 179,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.7536,
+            "eficiencia_cami": 0.9162
+        },
+        "puntuacio_original": 4.907,
+        "puntuacio_recalibrada": 4.545
+    },
+    "03": {
+        "id_real": "8a244dda836883d2fe7ecd35c1dd80a1064e3596bc259104792d83700de0d866",
+        "metriques": {
+            "num_nodes": 76056,
+            "num_arestes": 111410,
+            "num_goals": 5178,
+            "moviments_solucio": 115,
+            "diametre": 865,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 2.9297,
+            "eficiencia_cami": 0.1329
+        },
+        "puntuacio_original": 4.35,
+        "puntuacio_recalibrada": 4.104
+    },
+    "04": {
+        "id_real": "ce79dc1084715ce112d88b370867fc8dd23668c4b6f59d67739ad5db7c9b52b7",
+        "metriques": {
+            "num_nodes": 52602,
+            "num_arestes": 125009,
+            "num_goals": 374,
+            "moviments_solucio": 130,
+            "diametre": 221,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.753,
+            "eficiencia_cami": 0.5882
+        },
+        "puntuacio_original": 4.691,
+        "puntuacio_recalibrada": 4.591
+    },
+    "06": {
+        "id_real": "cdb689fefe0e9a53c965714a923d8646bd56f2f5321eaf8d1c11cdfeaf43209e",
+        "metriques": {
+            "num_nodes": 2068,
+            "num_arestes": 3670,
+            "num_goals": 25,
+            "moviments_solucio": 63,
+            "diametre": 106,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.5493,
+            "eficiencia_cami": 0.5943
+        },
+        "puntuacio_original": 4.525,
+        "puntuacio_recalibrada": 3.043
+    },
+    "07": {
+        "id_real": "d234136e84173c7171ab81ce15b1ea2f40472a516f079583135a9c8181721d1e",
+        "metriques": {
+            "num_nodes": 30290,
+            "num_arestes": 69523,
+            "num_goals": 699,
+            "moviments_solucio": 70,
+            "diametre": 125,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.5905,
+            "eficiencia_cami": 0.56
+        },
+        "puntuacio_original": 4.67,
+        "puntuacio_recalibrada": 3.405
+    },
+    "08": {
+        "id_real": "e3d6856b53c155c4c47c77b4eb095fbb13f2f191789685c9bcc44f2949870e59",
+        "metriques": {
+            "num_nodes": 54075,
+            "num_arestes": 142012,
+            "num_goals": 138,
+            "moviments_solucio": 127,
+            "diametre": 187,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.2524,
+            "eficiencia_cami": 0.6791
+        },
+        "puntuacio_original": 4.759,
+        "puntuacio_recalibrada": 4.509
+    },
+    "09": {
+        "id_real": "e56eb4071de1a33467c0e55ee4594b301809b59dc38556cadfa231e7b9857630",
+        "metriques": {
+            "num_nodes": 4488,
+            "num_arestes": 6516,
+            "num_goals": 565,
+            "moviments_solucio": 54,
+            "diametre": 188,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 2.9037,
+            "eficiencia_cami": 0.2872
+        },
+        "puntuacio_original": 4.378,
+        "puntuacio_recalibrada": 3.029
+    },
+    "10": {
+        "id_real": "36454aaf1cfcbf71d11f4ab073112a9cb9ce6427f6397f9cf82d660aaaeaaae1",
+        "metriques": {
+            "num_nodes": 32928,
+            "num_arestes": 79040,
+            "num_goals": 103,
+            "moviments_solucio": 96,
+            "diametre": 125,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.8008,
+            "eficiencia_cami": 0.768
+        },
+        "puntuacio_original": 4.826,
+        "puntuacio_recalibrada": 3.915
+    },
+    "11": {
+        "id_real": "3e653fd5c15993d490faffd50e442d4e78ae1166524f8c8c22a0edb2c61af1c2",
+        "metriques": {
+            "num_nodes": 27381,
+            "num_arestes": 56755,
+            "num_goals": 2827,
+            "moviments_solucio": 76,
+            "diametre": 192,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.1456,
+            "eficiencia_cami": 0.3958
+        },
+        "puntuacio_original": 4.547,
+        "puntuacio_recalibrada": 3.573
+    },
+    "12": {
+        "id_real": "54d84b5558d7c0a71ae70bc0a426c8e02e4640808dd51219eb66813dff3ec19e",
+        "metriques": {
+            "num_nodes": 417972,
+            "num_arestes": 972313,
+            "num_goals": 2926,
+            "moviments_solucio": 199,
+            "diametre": 391,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.6525,
+            "eficiencia_cami": 0.509
+        },
+        "puntuacio_original": 4.632,
+        "puntuacio_recalibrada": 4.632
+    },
+    "13": {
+        "id_real": "90c721d94902e506c598b7eda081c0ff82a5dc5430bb497ca2884e53dee5dad1",
+        "metriques": {
+            "num_nodes": 17314,
+            "num_arestes": 43701,
+            "num_goals": 544,
+            "moviments_solucio": 76,
+            "diametre": 145,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.0481,
+            "eficiencia_cami": 0.5241
+        },
+        "puntuacio_original": 4.643,
+        "puntuacio_recalibrada": 3.476
+    },
+    "14": {
+        "id_real": "2608f1dc3a5191430218820279543b7f0e678c5fd01f133df3983eb14b8d079d",
+        "metriques": {
+            "num_nodes": 35307,
+            "num_arestes": 76428,
+            "num_goals": 4627,
+            "moviments_solucio": 62,
+            "diametre": 173,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.3293,
+            "eficiencia_cami": 0.3584
+        },
+        "puntuacio_original": 4.519,
+        "puntuacio_recalibrada": 3.318
+    },
+    "15": {
+        "id_real": "4e58bb860422912e8f5d974819a76eb1e939373eb1fe8201effa52d6c30c654e",
+        "metriques": {
+            "num_nodes": 66660,
+            "num_arestes": 175014,
+            "num_goals": 146,
+            "moviments_solucio": 243,
+            "diametre": 295,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.2509,
+            "eficiencia_cami": 0.8237
+        },
+        "puntuacio_original": 4.868,
+        "puntuacio_recalibrada": 4.824
+    },
+    "16": {
+        "id_real": "d6e3e8aeb2c8a6dd9e1bd2bf3b470756bdb43378275167d943c72b9731d9a3f2",
+        "metriques": {
+            "num_nodes": 900802,
+            "num_arestes": 2249975,
+            "num_goals": 159708,
+            "moviments_solucio": 55,
+            "diametre": 359,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.9955,
+            "eficiencia_cami": 0.1532
+        },
+        "puntuacio_original": 4.365,
+        "puntuacio_recalibrada": 3.35
+    },
+    "17": {
+        "id_real": "2b5638d54467d9ae4d4e4b76bb77d11caeb4d885b48c724df87f5630ff93bc9f",
+        "metriques": {
+            "num_nodes": 11173,
+            "num_arestes": 21363,
+            "num_goals": 876,
+            "moviments_solucio": 60,
+            "diametre": 192,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.824,
+            "eficiencia_cami": 0.3125
+        },
+        "puntuacio_original": 4.484,
+        "puntuacio_recalibrada": 3.22
+    },
+    "18": {
+        "id_real": "d5752eacee4dfaa05cdbf8a446122bacd426e16583bfacaca701da7faa8525b4",
+        "metriques": {
+            "num_nodes": 29146,
+            "num_arestes": 65367,
+            "num_goals": 6732,
+            "moviments_solucio": 52,
+            "diametre": 155,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.4855,
+            "eficiencia_cami": 0.3355
+        },
+        "puntuacio_original": 4.502,
+        "puntuacio_recalibrada": 3.091
+    },
+    "19": {
+        "id_real": "0db6add3dcea4ca1d7fc7f7746883dc55648c77874b50b11568ec0e03c5ba34d",
+        "metriques": {
+            "num_nodes": 2821,
+            "num_arestes": 5157,
+            "num_goals": 416,
+            "moviments_solucio": 31,
+            "diametre": 102,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.6562,
+            "eficiencia_cami": 0.3039
+        },
+        "puntuacio_original": 4.341,
+        "puntuacio_recalibrada": 2.412
+    },
+    "20": {
+        "id_real": "706050bb3765d9e29b48d11ea124e21451b5528a82c5d0291ee6a2ef034a9e19",
+        "metriques": {
+            "num_nodes": 52597,
+            "num_arestes": 124370,
+            "num_goals": 5553,
+            "moviments_solucio": 37,
+            "diametre": 123,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.7292,
+            "eficiencia_cami": 0.3008
+        },
+        "puntuacio_original": 4.476,
+        "puntuacio_recalibrada": 2.81
+    },
+    "21": {
+        "id_real": "dd7cf4628dac6640670f91187799dd10a8ba577a8f4dab211ce7d687f7581543",
+        "metriques": {
+            "num_nodes": 53076,
+            "num_arestes": 124518,
+            "num_goals": 6309,
+            "moviments_solucio": 32,
+            "diametre": 69,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.6921,
+            "eficiencia_cami": 0.4638
+        },
+        "puntuacio_original": 4.598,
+        "puntuacio_recalibrada": 2.689
+    },
+    "22": {
+        "id_real": "0093825c855457012919e04e3de946df052e09ccafed5e6f97c87f1f1fe1cc28",
+        "metriques": {
+            "num_nodes": 7328,
+            "num_arestes": 13264,
+            "num_goals": 801,
+            "moviments_solucio": 45,
+            "diametre": 224,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.6201,
+            "eficiencia_cami": 0.2009
+        },
+        "puntuacio_original": 4.367,
+        "puntuacio_recalibrada": 3.005
+    },
+    "23": {
+        "id_real": "04afe9dc3633573e39963517b48d4ffc984454833ae0fddfef38394982b2fca4",
+        "metriques": {
+            "num_nodes": 6484,
+            "num_arestes": 14270,
+            "num_goals": 224,
+            "moviments_solucio": 56,
+            "diametre": 100,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.4016,
+            "eficiencia_cami": 0.56
+        },
+        "puntuacio_original": 4.623,
+        "puntuacio_recalibrada": 3.003
+    },
+    "24": {
+        "id_real": "50368e06dbe07c3eae74ec0134edabd2187acd9342e5055681ab162d46e95d64",
+        "metriques": {
+            "num_nodes": 25955,
+            "num_arestes": 41948,
+            "num_goals": 964,
+            "moviments_solucio": 126,
+            "diametre": 190,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.2324,
+            "eficiencia_cami": 0.6632
+        },
+        "puntuacio_original": 4.747,
+        "puntuacio_recalibrada": 4.431
+    },
+    "25": {
+        "id_real": "860f612d80823ebb994413c13b1b6993c5b62d71ffdf28d77762dc2acbf39301",
+        "metriques": {
+            "num_nodes": 25955,
+            "num_arestes": 41948,
+            "num_goals": 964,
+            "moviments_solucio": 126,
+            "diametre": 190,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.2324,
+            "eficiencia_cami": 0.6632
+        },
+        "puntuacio_original": 4.747,
+        "puntuacio_recalibrada": 4.431
+    },
+    "26": {
+        "id_real": "9c83a364aa5e26f0298371c8dc820d6bfc6836c50ca7b07c61c8d688eb4ecde9",
+        "metriques": {
+            "num_nodes": 8659,
+            "num_arestes": 16079,
+            "num_goals": 217,
+            "moviments_solucio": 52,
+            "diametre": 150,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.7138,
+            "eficiencia_cami": 0.3467
+        },
+        "puntuacio_original": 4.494,
+        "puntuacio_recalibrada": 2.979
+    },
+    "27": {
+        "id_real": "f5c7fb51bb81f642b617d0fef1d89045b47fff2cfaa254c12711c616a8af92d8",
+        "metriques": {
+            "num_nodes": 25955,
+            "num_arestes": 41948,
+            "num_goals": 964,
+            "moviments_solucio": 126,
+            "diametre": 190,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.2324,
+            "eficiencia_cami": 0.6632
+        },
+        "puntuacio_original": 4.747,
+        "puntuacio_recalibrada": 4.431
+    },
+    "28": {
+        "id_real": "f5e56f1022a30910e4cd2e5106a9458afbc79e2e61d9479729ed9101f585b539",
+        "metriques": {
+            "num_nodes": 25955,
+            "num_arestes": 41948,
+            "num_goals": 964,
+            "moviments_solucio": 126,
+            "diametre": 190,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.2324,
+            "eficiencia_cami": 0.6632
+        },
+        "puntuacio_original": 4.747,
+        "puntuacio_recalibrada": 4.431
+    },
+    "29": {
+        "id_real": "a6552eee0c4a931474f7c9c431c24de44f3f19e3fc50364aa449181df08d7249",
+        "metriques": {
+            "num_nodes": 569138,
+            "num_arestes": 1669741,
+            "num_goals": 88965,
+            "moviments_solucio": 52,
+            "diametre": 199,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.8676,
+            "eficiencia_cami": 0.2613
+        },
+        "puntuacio_original": 4.446,
+        "puntuacio_recalibrada": 3.295
+    },
+    "30": {
+        "id_real": "5da098967c3e903fc87402a450199b5174dcc1a71a2370181ebe018f52a0e4fe",
+        "metriques": {
+            "num_nodes": 25955,
+            "num_arestes": 41948,
+            "num_goals": 964,
+            "moviments_solucio": 116,
+            "diametre": 190,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.2324,
+            "eficiencia_cami": 0.6105
+        },
+        "puntuacio_original": 4.708,
+        "puntuacio_recalibrada": 4.258
+    },
+    "31": {
+        "id_real": "8cbabdfab617a61a59550c599a17d95a84ab6ad5d797004326118cfe9fc34ac5",
+        "metriques": {
+            "num_nodes": 5148,
+            "num_arestes": 15359,
+            "num_goals": 156,
+            "moviments_solucio": 44,
+            "diametre": 85,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.967,
+            "eficiencia_cami": 0.5176
+        },
+        "puntuacio_original": 4.566,
+        "puntuacio_recalibrada": 2.741
+    },
+    "32": {
+        "id_real": "5b42bfc20d5ff5c256a0ef38dc7e41c659aaa4e85a2a75954c24f58f309ece08",
+        "metriques": {
+            "num_nodes": 11110,
+            "num_arestes": 20886,
+            "num_goals": 419,
+            "moviments_solucio": 98,
+            "diametre": 156,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.7599,
+            "eficiencia_cami": 0.6282
+        },
+        "puntuacio_original": 4.721,
+        "puntuacio_recalibrada": 3.845
+    },
+    "33": {
+        "id_real": "820f8d42ac46d751f01728cdac4d97e64eaeff8c4ba8c76ecfadbfa36af4d44d",
+        "metriques": {
+            "num_nodes": 6363,
+            "num_arestes": 11043,
+            "num_goals": 347,
+            "moviments_solucio": 185,
+            "diametre": 244,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.471,
+            "eficiencia_cami": 0.7582
+        },
+        "puntuacio_original": 4.77,
+        "puntuacio_recalibrada": 4.573
+    },
+    "34": {
+        "id_real": "f1964b2d4744175b04c5005cefc2c4662c7b801211124b881756a1e8a84c8cf4",
+        "metriques": {
+            "num_nodes": 431,
+            "num_arestes": 824,
+            "num_goals": 85,
+            "moviments_solucio": 29,
+            "diametre": 50,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.8237,
+            "eficiencia_cami": 0.58
+        },
+        "puntuacio_original": 4.286,
+        "puntuacio_recalibrada": 2.259
+    },
+    "35": {
+        "id_real": "1f7ae9a0d1ea2f6e26b252f0128f798a7922eca67cf1065b9c61df98de223997",
+        "metriques": {
+            "num_nodes": 1465,
+            "num_arestes": 3662,
+            "num_goals": 169,
+            "moviments_solucio": 41,
+            "diametre": 52,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.9993,
+            "eficiencia_cami": 0.7885
+        },
+        "puntuacio_original": 4.633,
+        "puntuacio_recalibrada": 2.688
+    },
+    "36": {
+        "id_real": "aef43221f54ec58c984d1c2f8a9009adf404f5a89351efd361f3a6936908fc61",
+        "metriques": {
+            "num_nodes": 14857,
+            "num_arestes": 34150,
+            "num_goals": 784,
+            "moviments_solucio": 27,
+            "diametre": 132,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.5972,
+            "eficiencia_cami": 0.2045
+        },
+        "puntuacio_original": 4.228,
+        "puntuacio_recalibrada": 2.525
+    },
+    "37": {
+        "id_real": "7b411f3362c3297bbc35e9834ba42c57d7930ee2c221795037b48dba853c30c0",
+        "metriques": {
+            "num_nodes": 2998,
+            "num_arestes": 6518,
+            "num_goals": 201,
+            "moviments_solucio": 28,
+            "diametre": 104,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.3482,
+            "eficiencia_cami": 0.2692
+        },
+        "puntuacio_original": 4.204,
+        "puntuacio_recalibrada": 2.357
+    },
+    "38": {
+        "id_real": "6e440cf15287667f903964b19aee69d24fb92ee51f25ca31df4d588316fb8fd3",
+        "metriques": {
+            "num_nodes": 1164,
+            "num_arestes": 2731,
+            "num_goals": 60,
+            "moviments_solucio": 28,
+            "diametre": 46,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.6924,
+            "eficiencia_cami": 0.6087
+        },
+        "puntuacio_original": 4.296,
+        "puntuacio_recalibrada": 2.34
+    },
+    "39": {
+        "id_real": "f6f5955a678e1922fb1ef463cb7002e5915a5fdf483841456ec5d15ffa4bd618",
+        "metriques": {
+            "num_nodes": 301596,
+            "num_arestes": 764758,
+            "num_goals": 1611,
+            "moviments_solucio": 133,
+            "diametre": 213,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.0714,
+            "eficiencia_cami": 0.6244
+        },
+        "puntuacio_original": 4.718,
+        "puntuacio_recalibrada": 4.669
+    },
+    "40": {
+        "id_real": "a323f45c91b6c760b25a422d4ace15459aa13b4803acc212d6000ea5cfe5bafa",
+        "metriques": {
+            "num_nodes": 91901,
+            "num_arestes": 229574,
+            "num_goals": 9154,
+            "moviments_solucio": 47,
+            "diametre": 189,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.9961,
+            "eficiencia_cami": 0.2487
+        },
+        "puntuacio_original": 4.437,
+        "puntuacio_recalibrada": 3.17
+    },
+    "41": {
+        "id_real": "ebc25520629f258134d0b19d37dec6d8f1416071ec656ba883cd73b61fa65518",
+        "metriques": {
+            "num_nodes": 161,
+            "num_arestes": 246,
+            "num_goals": 16,
+            "moviments_solucio": 31,
+            "diametre": 46,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.0559,
+            "eficiencia_cami": 0.6739
+        },
+        "puntuacio_original": 4.248,
+        "puntuacio_recalibrada": 2.259
+    },
+    "42": {
+        "id_real": "c519c6d6c239b1622ff53e96d960a5a482f52e08ef1c3aca0e8bf8a6ed2251f5",
+        "metriques": {
+            "num_nodes": 686,
+            "num_arestes": 1658,
+            "num_goals": 84,
+            "moviments_solucio": 31,
+            "diametre": 53,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.8338,
+            "eficiencia_cami": 0.5849
+        },
+        "puntuacio_original": 4.398,
+        "puntuacio_recalibrada": 2.34
+    },
+    "43": {
+        "id_real": "9dee2397aaa022975e50805104003811e8b84d9e382fb46fa3f8521e98feb209",
+        "metriques": {
+            "num_nodes": 21196,
+            "num_arestes": 51200,
+            "num_goals": 1116,
+            "moviments_solucio": 25,
+            "diametre": 113,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.8311,
+            "eficiencia_cami": 0.2212
+        },
+        "puntuacio_original": 4.124,
+        "puntuacio_recalibrada": 2.479
+    },
+    "44": {
+        "id_real": "a0e568e4ef226bfa12a75f7e7bad0b0ff223d7ec1ab6da4a00a3a686319bfd7f",
+        "metriques": {
+            "num_nodes": 18036,
+            "num_arestes": 39371,
+            "num_goals": 797,
+            "moviments_solucio": 14,
+            "diametre": 181,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.3658,
+            "eficiencia_cami": 0.0773
+        },
+        "puntuacio_original": 3.375,
+        "puntuacio_recalibrada": 2.434
+    },
+    "45": {
+        "id_real": "22a2c1730d1ec52e456928b4ae5d0d12e32db59bd5567dab9a6bdef4f8acd196",
+        "metriques": {
+            "num_nodes": 11936,
+            "num_arestes": 23780,
+            "num_goals": 657,
+            "moviments_solucio": 18,
+            "diametre": 109,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.9846,
+            "eficiencia_cami": 0.1651
+        },
+        "puntuacio_original": 3.674,
+        "puntuacio_recalibrada": 2.281
+    },
+    "46": {
+        "id_real": "82345d3e2e792ef977f3b961f90d4e732a275c218f82d71e203fafa6da932a7a",
+        "metriques": {
+            "num_nodes": 390,
+            "num_arestes": 732,
+            "num_goals": 41,
+            "moviments_solucio": 22,
+            "diametre": 48,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.7538,
+            "eficiencia_cami": 0.4583
+        },
+        "puntuacio_original": 3.745,
+        "puntuacio_recalibrada": 2.059
+    },
+    "47": {
+        "id_real": "9ca84f2141934700d647b0d13c7c688bf6abe9262ce5186f3bc6ebd3adb7cf01",
+        "metriques": {
+            "num_nodes": 1694,
+            "num_arestes": 4258,
+            "num_goals": 185,
+            "moviments_solucio": 18,
+            "diametre": 57,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.0272,
+            "eficiencia_cami": 0.3158
+        },
+        "puntuacio_original": 3.594,
+        "puntuacio_recalibrada": 2.055
+    },
+    "48": {
+        "id_real": "3cdca299415077b968d6a86bcc51b413eebaaa2b16d9c1475d24d82cb90d31fb",
+        "metriques": {
+            "num_nodes": 39204,
+            "num_arestes": 99041,
+            "num_goals": 5159,
+            "moviments_solucio": 18,
+            "diametre": 77,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 5.0526,
+            "eficiencia_cami": 0.2338
+        },
+        "puntuacio_original": 3.725,
+        "puntuacio_recalibrada": 2.33
+    },
+    "50": {
+        "id_real": "da2155919b7031894ad4a425554972bdaa6200febb415d8558ec04c5274bdbe3",
+        "metriques": {
+            "num_nodes": 140,
+            "num_arestes": 269,
+            "num_goals": 8,
+            "moviments_solucio": 16,
+            "diametre": 23,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.8429,
+            "eficiencia_cami": 0.6957
+        },
+        "puntuacio_original": 3.087,
+        "puntuacio_recalibrada": 1.987
+    },
+    "51": {
+        "id_real": "a174f499c15ebd280855f2d8edf7703a65943f6cc4a18e200d28652d82b41314",
+        "metriques": {
+            "num_nodes": 2057,
+            "num_arestes": 4836,
+            "num_goals": 207,
+            "moviments_solucio": 15,
+            "diametre": 63,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.702,
+            "eficiencia_cami": 0.2381
+        },
+        "puntuacio_original": 3.382,
+        "puntuacio_recalibrada": 1.993
+    },
+    "52": {
+        "id_real": "510ab7b0dbb78922d3a6c8c399f24f0eb8e335a561433f778fa8a1f55da894d4",
+        "metriques": {
+            "num_nodes": 10464,
+            "num_arestes": 32950,
+            "num_goals": 2904,
+            "moviments_solucio": 17,
+            "diametre": 55,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 6.2978,
+            "eficiencia_cami": 0.3091
+        },
+        "puntuacio_original": 3.723,
+        "puntuacio_recalibrada": 2.187
+    },
+    "53": {
+        "id_real": "6f8af1fe1af8bd4d962b02621d509f575d8f8b6ef9d6015e95f60352b62e003c",
+        "metriques": {
+            "num_nodes": 1331,
+            "num_arestes": 2694,
+            "num_goals": 59,
+            "moviments_solucio": 10,
+            "diametre": 71,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.0481,
+            "eficiencia_cami": 0.1408
+        },
+        "puntuacio_original": 2.97,
+        "puntuacio_recalibrada": 1.842
+    },
+    "55": {
+        "id_real": "b2ea7a7fffb65cd00927ff175dbe0820e9ccc6f6dec49d5f900d9f289d8380e6",
+        "metriques": {
+            "num_nodes": 738,
+            "num_arestes": 1400,
+            "num_goals": 87,
+            "moviments_solucio": 9,
+            "diametre": 32,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.794,
+            "eficiencia_cami": 0.2812
+        },
+        "puntuacio_original": 2.683,
+        "puntuacio_recalibrada": 1.755
+    },
+    "56": {
+        "id_real": "2326aa8ffac7bb802ae4c147b669ad63f88afd23369b42af84db25dfa1e96615",
+        "metriques": {
+            "num_nodes": 17820,
+            "num_arestes": 55356,
+            "num_goals": 3135,
+            "moviments_solucio": 10,
+            "diametre": 47,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 6.2128,
+            "eficiencia_cami": 0.2128
+        },
+        "puntuacio_original": 3.198,
+        "puntuacio_recalibrada": 2.04
+    },
+    "58": {
+        "id_real": "f15847df05c62d0d2d79e90182f6c020468abc41fefe3e3696902fb4ced9d2d0",
+        "metriques": {
+            "num_nodes": 16,
+            "num_arestes": 24,
+            "num_goals": 1,
+            "moviments_solucio": 4,
+            "diametre": 6,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 3.0,
+            "eficiencia_cami": 0.6667
+        },
+        "puntuacio_original": 1.881,
+        "puntuacio_recalibrada": 1.567
+    },
+    "59": {
+        "id_real": "5414cf3bb6eb6ef233b850b5227666dc57e6e337e06d5b4d21f1055954db7eb8",
+        "metriques": {
+            "num_nodes": 12,
+            "num_arestes": 17,
+            "num_goals": 1,
+            "moviments_solucio": 3,
+            "diametre": 5,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 2.8333,
+            "eficiencia_cami": 0.6
+        },
+        "puntuacio_original": 1.728,
+        "puntuacio_recalibrada": 1.477
+    },
+    "60": {
+        "id_real": "7f1ded3b1b6676273f64c05de9147c3f40fca42f5dc8e8050ad84fd1c9a19980",
+        "metriques": {
+            "num_nodes": 232560,
+            "num_arestes": 1593648,
+            "num_goals": 11628,
+            "moviments_solucio": 5,
+            "diametre": 30,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 13.7053,
+            "eficiencia_cami": 0.1667
+        },
+        "puntuacio_original": 2.617,
+        "puntuacio_recalibrada": 2.041
+    },
+    "61": {
+        "id_real": "94eb6007ed79b3d8f74b0a282347dcada36877a35dab03e5ba0aa091c19d01a3",
+        "metriques": {
+            "num_nodes": 546,
+            "num_arestes": 1128,
+            "num_goals": 35,
+            "moviments_solucio": 8,
+            "diametre": 37,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.1319,
+            "eficiencia_cami": 0.2162
+        },
+        "puntuacio_original": 2.618,
+        "puntuacio_recalibrada": 1.683
+    },
+    "62": {
+        "id_real": "b9309ce6622ba0023661fd3fadf046f9eca8252db35c0329a178aefda2526794",
+        "metriques": {
+            "num_nodes": 333,
+            "num_arestes": 792,
+            "num_goals": 20,
+            "moviments_solucio": 7,
+            "diametre": 32,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.7568,
+            "eficiencia_cami": 0.2188
+        },
+        "puntuacio_original": 2.433,
+        "puntuacio_recalibrada": 1.613
+    },
+    "63": {
+        "id_real": "fcc57f7ab2cd2e6994d1a1e775eb4e5ed49693fa0510c1fbf333b7845cf2747a",
+        "metriques": {
+            "num_nodes": 202,
+            "num_arestes": 414,
+            "num_goals": 29,
+            "moviments_solucio": 5,
+            "diametre": 29,
+            "fraccio_component_gran": 1.0,
+            "fraccio_atzucacs": 0.0,
+            "grau_mitja": 4.099,
+            "eficiencia_cami": 0.1724
+        },
+        "puntuacio_original": 2.183,
+        "puntuacio_recalibrada": 1.499
+    }
+}

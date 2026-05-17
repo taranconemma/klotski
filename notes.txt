@@ -63,3 +63,30 @@ incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a
  porta d'entrada, de manera que executar múltiples operacions seguides sobre un mateix puzzle 
  (resoldre'l, avaluar-lo, visualitzar-lo) és gairebé instantani un cop el graf s'ha construït la 
  primera vegada. Per forçar una reconstrucció, totes les eines accepten l'argument --forçar.
+
+
+ Mètrica: Eficiència del camí
+La idea és comparar quant de llarga és la solució respecte a quant gran és el puzzle en total.
+
+Imagina dos puzzles, tots dos resolts en 30 moviments:
+
+Puzzle A: diàmetre 35. Necessites 30 de 35 passos possibles → estàs gairebé al límit, és molt eficient i ajustat.
+Puzzle B: diàmetre 200. Necessites 30 de 200 passos → la solució és relativament "còrta" dins d'un espai enorme.
+La fórmula seria simplement:
+
+eficiència = moviments_solució / diàmetre
+Un valor proper a 1.0 significa que per resoldre el puzzle has de recórrer quasi tot el que el puzzle permet: cada moviment compta i no hi ha dreceres. És com un laberint on el camí de sortida és el més llarg possible.
+
+Un valor proper a 0 significa que la solució és "fàcil de trobar" en comparació amb la profunditat real del puzzle: hi ha molt espai però la sortida és a la cantonada.
+
+El que fa interessant aquesta mètrica és que premia puzzles on la solució òptima és quasi el millor que es pot fer, sense deixar marge. És un bon indicador de que el puzzle et "exigeix" sense tenir sortides alternatives fàcils.
+
+
+
+rate_all.py és una eina d'avaluació massiva que llegeix tots els puzzles descarregats a la memòria cau local.
+Construeix el graf d'estats de cada puzzle i si un puzzle és massa gran o té error de format, el salta automàticament sense aturar la resta del procés.
+Extreu mètriques brutes de dificultat: estats totals, longitud de solució, diàmetre i eficiència del camí.
+Genera la distribució estadística de cada mètrica (percentils) i la desa a calibracio.json.
+Avalua la duresa dels llindars actuals i et proposa nous valors calibrats per copiar directament a eval.py.
+Calcula la puntuació recalibrada de cada puzzle vàlid i la desa juntament amb el seu ID a ratings.json.
+Finalment, connecta amb rate.py per permetre pujar totes les valoracions vàlides de cop al servidor.

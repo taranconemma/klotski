@@ -16,6 +16,7 @@ un pas en una direcció (N, E, S, W).
 """
 
 import sys
+import time
 from collections import deque
 from pathlib import Path
 
@@ -23,6 +24,14 @@ from graph_tool.all import * #importem directament les funcions que utilitzarem
 
 from logic import possible_moves, apply_move, is_goal
 from puzzle import Puzzle, State, Piece, Coord
+
+# -------------------------------------------------------------------------
+# CONFIGURACIÓ DEL TIMEOUT
+# -------------------------------------------------------------------------
+# Canvia TIMEOUT_ACTIVAT a False si vols desactivar el límit de temps
+# (per exemple, per a puzzles grans on tens paciència d'esperar).
+TIMEOUT_ACTIVAT: bool = True
+TIMEOUT_SEGONS: int   = 5 * 60  # 5 minuts
 
 # Tipus per a la clau canònica d'un estat (hashable)
 StateKey = tuple[Coord, ...]
@@ -120,10 +129,20 @@ def build_graph(puzzle: Puzzle) -> Graph:
     visited: set[StateKey] = {state_key(puzzle, puzzle.start)}
     added_edges: set[tuple[StateKey, StateKey]] = set()
 
+    t_inici = time.monotonic()  # Instant d'inici del BFS
+
     while queue:
         current = queue.popleft()
         current_key = state_key(puzzle, current)
         current_v = key_to_v[current_key]
+
+        # Comprovació de timeout (cada node processat)
+        if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
+            raise TimeoutError(
+                f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. "
+                f"El puzzle té molts estats (ja n'hi ha {g.num_vertices():,} processats). "
+                "Per desactivar el límit, canvia TIMEOUT_ACTIVAT = False a graph.py."
+            )
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
             next_state = apply_move(puzzle, current, (piece_idx, direction, dist))
@@ -183,7 +202,11 @@ if __name__ == "__main__":
         sys.exit(0)
 
     print(f"Construint el graf per: {json_path}")
-    g = build_graph(puzzle)
+    try:
+        g = build_graph(puzzle)
+    except TimeoutError as e:
+        print(f"\n⏱️  {e}")
+        sys.exit(1)
     print_summary(puzzle, g)
 
     g.save(str(output_path))

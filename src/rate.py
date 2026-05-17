@@ -130,13 +130,64 @@ def envia_valoracio(id_puzzle, puntuacio, token):
 # -------------------------------------------------------------------------
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Uso: python src/rate.py <id_puzzle> <puntuació> [token]")
+        print("     python src/rate.py all [token]")
         print("Exemple: python src/rate.py klotski 4.5 el_teu_token")
         sys.exit(1)
 
     id_puzzle = sys.argv[1]
-    
+
+    # --- PUJADA MASSIVA DE RATINGS ---
+    if id_puzzle == "all":
+        ratings_path = Path("puzzles/downloads/ratings.json")
+        if not ratings_path.exists():
+            print("❌ Error: No s'ha trobat puzzles/downloads/ratings.json.")
+            print("   Has d'executar primer 'make rate_all' per generar i recalibrar els ratings.")
+            sys.exit(1)
+
+        with open(ratings_path) as f:
+            ratings = json.load(f)
+
+        token = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("KLOTSKI_TOKEN")
+        if not token:
+            print("❌ Error: cal proporcionar el token d'autenticació.")
+            print("   Opció 1: python src/rate.py all <token>")
+            print("   Opció 2: export KLOTSKI_TOKEN='token' i després executar")
+            sys.exit(1)
+
+        print(f"Subint valoracions de {len(ratings)} puzzles...")
+        exitos = 0
+        errors = 0
+
+        for clau_curta, data in sorted(ratings.items()):
+            id_real = data["id_real"]
+            puntuacio_float = data.get("puntuacio_recalibrada", data.get("puntuacio_original", 0.0))
+            puntuacio = int(round(puntuacio_float))
+
+            print(f"\n[{clau_curta}] Enviant valoració de {puntuacio} estrelles (recalibrada: {puntuacio_float:.2f})...")
+            if envia_valoracio(id_real, puntuacio, token):
+                exitos += 1
+            else:
+                errors += 1
+
+        print()
+        print("══════════════════════════════════════════════════════════════════════")
+        print("  RESUM DE LA PUJADA MASSIVA")
+        print("══════════════════════════════════════════════════════════════════════")
+        print(f"  Enviats correctament: {exitos}")
+        print(f"  Amb errors:           {errors}")
+        print("══════════════════════════════════════════════════════════════════════")
+        if errors > 0:
+            sys.exit(1)
+        sys.exit(0)
+
+    # --- PUJADA D'UN ÚNIC PUZZLE ---
+    if len(sys.argv) < 3:
+        print("❌ Error: cal especificar la puntuació per a un únic puzzle.")
+        print("Uso: python src/rate.py <id_puzzle> <puntuació> [token]")
+        sys.exit(1)
+
     # Comprovem si ens han passat un índex numèric (ex: '50') i busquem el seu ID real
     id_real = id_puzzle
     fitxer_puzzle = f"puzzles/{id_puzzle}.json"

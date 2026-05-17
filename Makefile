@@ -24,6 +24,12 @@ eval: graf_sol
 rate: graf_sol
 	pixi run python src/rate.py $(p) $(score) $(token)
 
+rate_all:
+	pixi run python src/rate_all.py
+
+envia_rates:
+	pixi run python src/rate.py all $(token)
+
 descarrega: esborra
 	pixi run python src/download.py
 
@@ -33,4 +39,4 @@ git:
 	git push origin main
 
 esborra:
-	rm -f puzzles/downloads/*.json puzzles/index.json
+	rm -f puzzles/downloads/*.json puzzles/downloads/*.graphml puzzles/downloads/*.gif puzzles/index.json
