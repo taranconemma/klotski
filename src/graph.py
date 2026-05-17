@@ -120,6 +120,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
         current_key = state_key(puzzle, current)
         current_v = key_to_v[current_key]
 
+        #REVISASR
         # Comprovació de timeout (cada node processat)
         if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
             raise TimeoutError(
