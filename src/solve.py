@@ -1,6 +1,3 @@
-# solve.py. Resol el puzzle donant lloc a un fitxer amb els moviments necessaris per moure peça
-# a peça des de la posició inicial fins arribar a la final.
-
 """
 Carrega el graf generat per graph.py i troba el camí mínim (BFS) des de
 l'estat inicial fins a qualsevol estat final. Guarda els moviments en
