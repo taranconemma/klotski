@@ -1,18 +1,14 @@
-# graph.py. Donat un puzzle, guarda el graf resultant. graph-tool permet guardar el 
-# graf en un fitxer .graphml, que facilita l'intercanvi amb les altres eines.
-# graph.py. Donat un puzzle, guarda el graf resultant. graph-tool permet guardar el
-# graf en un fitxer .graphml, que facilita l'intercanvi amb les altres eines.
-
 """
-Construeix el graf d'estats d'un puzzle Klotski i el guarda en .graphml.
+Donat un puzzle, guarda el graf resultant. graph-tool permet guardar el graf en 
+un fitxer .graphml, que facilita l'intercanvi amb les altres eines (com ara el 
+solve.py o l'eval.py).
 
 Cada node és un estat (disposició de les peces). Dos nodes estan connectats
 per una aresta si es pot passar d'un estat a l'altre movent una sola peça
-un pas en una direcció (N, E, S, W).
+un pas en una direcció (N, E, S, W). Per més detalls: consultar el README.
 
 Ús:
     python src/graph.py puzzles/sample1.json
-    python src/graph.py puzzles/sample1.json -o output.graphml
 """
 
 import sys
@@ -20,35 +16,23 @@ import time
 from collections import deque
 from pathlib import Path
 
-from graph_tool.all import * #importem directament les funcions que utilitzarem
+from graph_tool.all import Graph, Vertex
 
 from logic import possible_moves, apply_move, is_goal
 from puzzle import Puzzle, State, Piece, Coord
 
-# -------------------------------------------------------------------------
-# CONFIGURACIÓ DEL TIMEOUT
-# -------------------------------------------------------------------------
-# Canvia TIMEOUT_ACTIVAT a False si vols desactivar el límit de temps
-# (per exemple, per a puzzles grans on tens paciència d'esperar).
+# Per desactivar el límit de temps, canvia TIMEOUT_ACTIVAT a False
 TIMEOUT_ACTIVAT: bool = True
 TIMEOUT_SEGONS: int   = 5 * 60  # 5 minuts
 
-# Tipus per a la clau canònica d'un estat (hashable)
+# Tipus per a la clau d'un estat (no es repeteix per peces iguals intercanviades)
 StateKey = tuple[Coord, ...]
-
 
 def state_key(puzzle: Puzzle, state: State) -> StateKey:
     """
     Retorna una clau que identifica un estat.
-    Peces amb la mateixa forma s'ordenen per posició, de manera que
-    estats que només difereixen en l'intercanvi de peces iguals
-    tenen la mateixa clau.
-    
-    Aquesta optimització redueix el nombre de nodes en un factor exacte de k!
-    (on k és el nombre de peces no-objectiu iguals). Això és així perquè, en ser
-    indistingibles, passem de comptar les posicions com a permutacions P(n,k) a
-    comptar-les com a combinacions C(n,k). La relació P(n,k) = C(n,k) * k! demostra
-    que eliminem exactament les k! formes redundants d'ordenar aquestes peces.
+    Peces amb la mateixa forma s'ordenen per posició, de manera que estats que només 
+    difereixen en l'intercanvi de peces iguals tenen la mateixa clau.
     """
     positions = list(state.positions) #ho hem de fer mutable
 
@@ -89,19 +73,19 @@ def build_graph(puzzle: Puzzle) -> Graph:
     """
     g = Graph(directed=False) #fem servir el 'tipus' Graph del mòdul graph_tool per facilitar la visulitzacióposterior amb 3D_view.py
     
+    # Aquestes propietats s'han de declarar com si fossin atribut perquè després hi poguem doanr valors i utilitzar-les
     # Propietats dels nodes: cada node tindrà aquestes variables (son com atributs) i els hem de 'declarar'
     vp_state    = g.new_vertex_property("object") 
     vp_is_start = g.new_vertex_property("bool") 
     vp_is_goal  = g.new_vertex_property("bool")
-
     # Propietats de les arestes: el mateix que amb els nodes
     ep_piece     = g.new_edge_property("int")
     ep_direction = g.new_edge_property("string")
     ep_distance  = g.new_edge_property("int")
-
     # Propietat global: JSON del puzzle (necessari per 3D_view.py)
     gp_puzzle = g.new_graph_property("string")
     gp_puzzle[g] = puzzle.to_json() #a aquesta ja li assignem un valor
+    
     g.graph_properties["puzzle"] = gp_puzzle
 
     key_to_v: dict[StateKey, Vertex] = {}
@@ -121,7 +105,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
             vp_is_goal[v]  = is_goal(puzzle, state)
         return key_to_v[k]
 
-    # BFS des de l'estat inicial
+    # BFS des de l'estat inicial: l'hem de construir per poder-lo recórrer després amb les funcions pròpies de graph_tool
     start_v = get_or_create(puzzle.start)
     vp_is_start[start_v] = True
 
@@ -184,17 +168,16 @@ def print_summary(puzzle: Puzzle, g: Graph) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(f"Ús: python {sys.argv[0]} <puzzle.json> [-o sortida.graphml]")
-        sys.exit(1)
+        sys.exit(f"Ús: python {sys.argv[0]} <puzzle.json>")
 
     json_path = Path(sys.argv[1])
+    if not json_path.exists():
+        sys.exit(f"Error: no s'ha trobat {json_path}")
+
     puzzle = Puzzle.from_json(json_path.read_text())
 
-    # Fitxer de sortida: -o <fitxer> o per defecte <nom>.graphml
-    if "-o" in sys.argv:
-        output_path = Path(sys.argv[sys.argv.index("-o") + 1])
-    else:
-        output_path = json_path.with_suffix(".graphml")
+    # El fitxer de sortida es generarà automàticament canviant l'extensió a .graphml
+    output_path = json_path.with_suffix(".graphml")
 
     if output_path.exists():
         print(f"✅ El graf ja existeix: {output_path}")

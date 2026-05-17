@@ -42,6 +42,12 @@ incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a
  com a resolt quan no ho estava. La correcció exclou les peces objectiu de l'intercanvi, de manera 
  que només les peces secundàries iguals es col·lapsen.
 
+     Aquesta optimització redueix el nombre de nodes en un factor exacte de k!
+    (on k és el nombre de peces no-objectiu iguals). Això és així perquè, en ser
+    indistingibles, passem de comptar les posicions com a permutacions P(n,k) a
+    comptar-les com a combinacions C(n,k). La relació P(n,k) = C(n,k) * k! demostra
+    que eliminem exactament les k! formes redundants d'ordenar aquestes peces.
+
 
  IMPORTANTE: no subir los graphs.html porque revientan el github
 
