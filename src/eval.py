@@ -68,7 +68,7 @@ def mesura_nombre_estats(graf: Graph) -> float:
     return min(valor, 1.0) # Tallem a 1.0 per si és més gran del màxim esperat
 
 
-def mesura_longitud_solucio(graf: Graph, node_inici: int, nodes_objectiu: list[int]) -> float:
+def mesura_longitud_solucio(graf: Graph, node_inici: int, nodes_objectiu: list[int], distancies_des_de_inici: object | None = None) -> float:
     """ Mesura 2: Longitud del camí mínim fins a la solució
 
     Un puzzle on la solució requereix molts passos és més difícil i
@@ -78,9 +78,8 @@ def mesura_longitud_solucio(graf: Graph, node_inici: int, nodes_objectiu: list[i
     
     if not nodes_objectiu: return 0.0 # No hi ha solució
 
-    # Calculem la distància mínima des de l'inici fins a tots els objectius
-    # shortest_distance retorna una llista amb la distància a cada node
-    distancies = shortest_distance(graf, source=node_inici)
+    # Calculem o reutilitzem les distàncies
+    distancies = distancies_des_de_inici if distancies_des_de_inici is not None else shortest_distance(graf, source=node_inici)
 
     # Busquem la distància mínima entre tots els nodes objectiu i retornem el valor normalitzat
     dist_min = min(int(distancies[node]) for node in nodes_objectiu)
@@ -102,7 +101,7 @@ def mesura_diametre(graf: Graph) -> float:
     return min(diametre / MAX_DIAMETRE, 1.0)
 
 
-def mesura_eficiencia_cami(graf: Graph, node_inici: int, nodes_objectiu: list[int]) -> float:
+def mesura_eficiencia_cami(graf: Graph, node_inici: int, nodes_objectiu: list[int], distancies_des_de_inici: object | None = None) -> float:
     """
     Mesura 4: Eficiència del camí
 
@@ -121,10 +120,9 @@ def mesura_eficiencia_cami(graf: Graph, node_inici: int, nodes_objectiu: list[in
     diametre, _ = pseudo_diameter(graf)
     if diametre == 0: return 0.0
 
-    distancies = shortest_distance(graf, source=node_inici) # Calcular la distància a l'objectiu
-    dist_min = min(int(distancies[node]) for node in nodes_objectiu)
-
-    return min(dist_min / diametre, 1.0)
+    # Calculem o reutilitzem les distàncies
+    distancies = distancies_des_de_inici if distancies_des_de_inici is not None else shortest_distance(graf, source=node_inici)
+    return min(min(int(distancies[node]) for node in nodes_objectiu) / diametre, 1.0)
 
 
 def mesura_densitat_paranys(
@@ -415,10 +413,19 @@ def main(fitxer: str) -> float:
     puntuacio, detalls = puntua_puzzle(graf, puzzle, node_inici, nodes_objectiu)
 
     print(f"\n  AVALUACIÓ DEL PUZZLE:")
-    etiquetes = [("Nombre d'estats", "10%"), ("Longitud solució", "25%"), ("Diàmetre", "10%"), ("Eficiència camí", "10%"), ("Densitat paranys", "10%"), ("Ponts crítics", "10%"), ("Engany del gradient", "15%"), ("L'abisme", "10%")]
+    etiquetes = [
+        ("Nombre d'estats", "estats", "10%"),
+        ("Longitud solució", "solucio", "25%"),
+        ("Diàmetre", "diametre", "10%"),
+        ("Eficiència camí", "eficiencia", "10%"),
+        ("Densitat paranys", "paranys", "10%"),
+        ("Ponts crítics", "ponts", "10%"),
+        ("Engany del gradient", "engany", "15%"),
+        ("L'abisme", "abisme", "10%")
+    ]
     for nom, clau, pes in etiquetes:
         print(f"  {nom}: {detalls[clau]:.3f}  ({pes})")
-    print(f"  PUNTUACIÓ FINAL:  {puntuacio:.2f} / 5.00  ({round(puntuacio * 2) / 2:.1f}★)")
+    print(f"  PUNTUACIÓ FINAL:  {puntuacio:.2f} / 5.00  ({round(puntuacio * 2) / 2:.1f}★) \n")
 
     return puntuacio
 

@@ -15,6 +15,8 @@ Genera:
 No modifica mai eval.py. Al final mostra un bloc de codi llest per copiar-enganxar.
 """
 
+from __future__ import annotations
+
 import json
 import math
 import sys
@@ -22,105 +24,227 @@ from datetime import date
 from pathlib import Path
 
 import graph_tool.all as gt
-from graph_tool.all import shortest_distance, label_components, pseudo_diameter
+from graph_tool.all import (
+    shortest_distance,
+    shortest_path,
+    label_components,
+    label_biconnected_components,
+    pseudo_diameter,
+)
 
 from graph import build_graph, TIMEOUT_SEGONS
-from puzzle import Puzzle
+from puzzle import Puzzle, State
 
 
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # LLINDARS ACTUALS D'EVAL.PY (hard-coded aquí per poder comparar-los)
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
-LLINDAR_ESTATS    = 10_000   # log(n) / log(LLINDAR) → 1.0
-LLINDAR_SOLUCIO   = 30       # passos → 1.0
-LLINDAR_DIAMETRE  = 50       # diametre → 1.0
+LLINDAR_ESTATS:   int   = 10_000
+LLINDAR_SOLUCIO:  int   = 30
+LLINDAR_DIAMETRE: int   = 50
+LLINDAR_PARANYS:  float = 0.30
+LLINDAR_PONTS:    int   = 15
+LLINDAR_ENGANY:   int   = 20
+LLINDAR_ABISME:   int   = 40
 
 
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # CÀRREGA DEL GRAF (reutilitzant la caché de .graphml)
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
 def carregar_o_construir_graf(fitxer_json: Path) -> gt.Graph:
-    """Carrega el graf des del .graphml si existeix, altrament el construeix."""
+    """Carrega el graf des del .graphml si existeix, altrament el construeix i el desa."""
     graphml_path = fitxer_json.with_suffix(".graphml")
     if graphml_path.exists():
         return gt.load_graph(str(graphml_path))
-    else:
-        puzzle = Puzzle.from_json(fitxer_json.read_text())
-        g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
-        g.save(str(graphml_path))
-        return g
+    puzzle = Puzzle.from_json(fitxer_json.read_text())
+    g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
+    g.save(str(graphml_path))
+    return g
 
 
-# -------------------------------------------------------------------------
-# EXTRACCIÓ DE MÈTRIQUES EN BRUT
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# HELPERS INTERNS PER A LES MÈTRIQUES ORIGINALS
+# ─────────────────────────────────────────────────────────────────────────────
 
-def extraure_metriques_brutes(g: gt.Graph) -> dict:
-    """
-    Extreu les mètriques numèriques reals d'un graf (sense normalitzar).
+def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
+    """Suma de distàncies de Manhattan de cada peça objectiu a la seva meta."""
+    total = 0
+    for i, pos_meta in puzzle.goals:
+        px, py = state.positions[i]
+        mx, my = pos_meta
+        total += abs(px - mx) + abs(py - my)
+    return total
+
+
+def _nodes_cami_optim(
+    g: gt.Graph,
+    node_inici: gt.Vertex,
+    nodes_objectiu: list[gt.Vertex],
+    dist_inici: object,
+) -> list[gt.Vertex]:
+    """Retorna els nodes del camí òptim des de l'inici al goal més proper."""
+    best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
+    _, path_edges = shortest_path(g, node_inici, best_goal)
+    nodes: list[gt.Vertex] = [node_inici]
+    for e in path_edges:
+        s, t = e.source(), e.target()
+        nodes.append(t if t != nodes[-1] else s)
+    return nodes
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EXTRACCIÓ DE MÈTRIQUES EN BRUT (totes en un sol pas per eficiència)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
+    """Extreu totes les mètriques numèriques reals d'un graf (sense normalitzar).
 
     Retorna un diccionari amb:
-        - num_nodes: nombre de nodes
-        - num_arestes: nombre d'arestes
-        - moviments_solucio: longitud del camí mínim fins a un node goal
-        - diametre: pseudo-diàmetre del graf
-        - fraccio_atzucacs: fracció de nodes des dels quals NO es pot arribar a cap goal
-        - grau_mitja: nombre mitjà d'arestes per node
+        Clàssiques:
+            num_nodes, num_arestes, num_goals
+            moviments_solucio, diametre, eficiencia_cami
+            fraccio_atzucacs, grau_mitja
+        Originals:
+            paranys_ponderat  — densitat de culs-de-sac propers a la meta
+            ponts_al_cami     — nombre de ponts en el camí òptim
+            engany_gradient   — màxim allunyament heurístic en el camí òptim
+            cost_abisme       — pitjor cost de recuperació d'un error al camí
     """
     num_nodes   = g.num_vertices()
     num_arestes = g.num_edges()
 
-    # Node inicial i nodes objectiu
-    node_inici   = next(v for v in g.vertices() if g.vp["is_start"][v])
-    nodes_goal   = [v for v in g.vertices() if g.vp["is_goal"][v]]
-    num_goals    = len(nodes_goal)
+    node_inici    = next(v for v in g.vertices() if g.vp["is_start"][v])
+    nodes_objectiu = [v for v in g.vertices() if g.vp["is_goal"][v]]
+    num_goals     = len(nodes_objectiu)
 
-    # Longitud de la solució òptima (BFS des de l'inici)
+    INF = 2**31 - 1
+
+    # ── Mètriques clàssiques ──────────────────────────────────────────────
+
+    dist_inici = shortest_distance(g, source=node_inici)
+
     moviments_solucio = 0
-    if nodes_goal:
-        distancies = shortest_distance(g, source=node_inici)
-        moviments_solucio = min(int(distancies[v]) for v in nodes_goal)
+    if nodes_objectiu:
+        moviments_solucio = min(int(dist_inici[v]) for v in nodes_objectiu)
 
-    # Diàmetre
-    diametre, _ = pseudo_diameter(g) if num_nodes >= 2 else (0, None)
+    diametre = 0
+    if num_nodes >= 2:
+        diametre, _ = pseudo_diameter(g)
 
-    # Atzucacs: nodes des dels quals no es pot arribar a cap goal
-    # Fem un BFS invers: des de tots els goals cap enrere
-    # Si un node no és assolible des de cap goal (en graf no dirigit = mateixa component),
-    # no pot guanyar. Com és no dirigit, usem la distància des de cada goal.
-    # Un node és un atzucac si cap camí que passi per ell porta a un goal.
-    # Aproximació: nodes a components sense cap goal.
-    etiquetes, histograma_comp = label_components(g)
-    components_amb_goal: set[int] = set()
-    for v in nodes_goal:
-        components_amb_goal.add(int(etiquetes[v]))
+    eficiencia_cami = round(moviments_solucio / diametre, 4) if diametre > 0 else 0.0
 
-    atzucacs = sum(
-        1 for v in g.vertices()
-        if int(etiquetes[v]) not in components_amb_goal
-    )
-    fraccio_atzucacs = atzucacs / num_nodes if num_nodes > 0 else 0.0
+    etiquetes, _ = label_components(g)
+    components_amb_goal: set[int] = {int(etiquetes[v]) for v in nodes_objectiu}
+    atzucacs = sum(1 for v in g.vertices() if int(etiquetes[v]) not in components_amb_goal)
+    fraccio_atzucacs = round(atzucacs / num_nodes, 4) if num_nodes > 0 else 0.0
+    grau_mitja = round((2 * num_arestes) / num_nodes, 4) if num_nodes > 0 else 0.0
 
-    # Grau mitjà
-    grau_mitja = (2 * num_arestes) / num_nodes if num_nodes > 0 else 0.0
+    # ── Mètrica 5: Densitat de paranys ───────────────────────────────────
+    # Cada cul-de-sac es pondera per la seva proximitat al goal més proper.
+
+    dist_al_goal: dict[int, int] = {}
+    for goal_v in nodes_objectiu:
+        dg = shortest_distance(g, source=goal_v)
+        for v in g.vertices():
+            idx = int(v)
+            d = int(dg[v])
+            if idx not in dist_al_goal or d < dist_al_goal[idx]:
+                dist_al_goal[idx] = d
+
+    suma_paranys = 0.0
+    for v in g.vertices():
+        if v.out_degree() == 1:
+            d = dist_al_goal.get(int(v), INF)
+            if d < INF:
+                suma_paranys += 1.0 / (1.0 + d)
+    paranys_ponderat = round(suma_paranys / num_nodes, 6) if num_nodes > 0 else 0.0
+
+    # ── Mètrica 6: Ponts crítics en el camí òptim ────────────────────────
+    # Identifiquem ponts via components biconnectades.
+
+    ponts_al_cami = 0
+    if nodes_objectiu and num_nodes >= 2:
+        comp_aresta, _, _ = label_biconnected_components(g)
+        compte_per_comp: dict[int, int] = {}
+        for e in g.edges():
+            c = int(comp_aresta[e])
+            compte_per_comp[c] = compte_per_comp.get(c, 0) + 1
+
+        arestes_pont: set[tuple[int, int]] = set()
+        for e in g.edges():
+            c = int(comp_aresta[e])
+            if compte_per_comp[c] == 1:
+                s, t = int(e.source()), int(e.target())
+                arestes_pont.add((min(s, t), max(s, t)))
+
+        best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
+        _, path_edges = shortest_path(g, node_inici, best_goal)
+        for e in path_edges:
+            s, t = int(e.source()), int(e.target())
+            if (min(s, t), max(s, t)) in arestes_pont:
+                ponts_al_cami += 1
+
+    # ── Mètrica 7: Engany del gradient ───────────────────────────────────
+    # Màxim allunyament de la heurística de Manhattan al llarg del camí òptim.
+
+    engany_gradient = 0
+    if nodes_objectiu and g.vp.get("state"):
+        nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
+        h_inicial = _heuristica_manhattan(puzzle, g.vp["state"][node_inici])
+        h_max = h_inicial
+        for v in nodes_cami[1:]:
+            estat = g.vp["state"][v]
+            if estat is not None:
+                h = _heuristica_manhattan(puzzle, estat)
+                if h > h_max:
+                    h_max = h
+        engany_gradient = h_max - h_inicial
+
+    # ── Mètrica 8: L'abisme ──────────────────────────────────────────────
+    # Pitjor cost (anar + tornar) de fer un pas en fals en el camí òptim.
+
+    cost_abisme = 0
+    if nodes_objectiu and num_nodes >= 3:
+        nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
+        nodes_cami_ids: set[int] = {int(v) for v in nodes_cami}
+
+        for idx_cami, v in enumerate(nodes_cami[:-1]):
+            dists_des_de_v = shortest_distance(g, source=v)
+            for vei in v.out_neighbors():
+                if int(vei) in nodes_cami_ids:
+                    continue
+                dist_vei_a_cami = min(
+                    int(shortest_distance(g, source=vei)[u])
+                    for u in nodes_cami[idx_cami + 1:]
+                )
+                if dist_vei_a_cami < INF:
+                    cost = 1 + dist_vei_a_cami
+                    if cost > cost_abisme:
+                        cost_abisme = cost
 
     return {
-        "num_nodes":             num_nodes,
-        "num_arestes":           num_arestes,
-        "num_goals":             num_goals,
-        "moviments_solucio":     moviments_solucio,
-        "diametre":              int(diametre),
-        "fraccio_atzucacs":      round(fraccio_atzucacs, 4),
-        "grau_mitja":            round(grau_mitja, 4),
-        "eficiencia_cami":       round(moviments_solucio / diametre, 4) if diametre > 0 else 0.0,
+        # Clàssiques
+        "num_nodes":          num_nodes,
+        "num_arestes":        num_arestes,
+        "num_goals":          num_goals,
+        "moviments_solucio":  moviments_solucio,
+        "diametre":           int(diametre),
+        "fraccio_atzucacs":   fraccio_atzucacs,
+        "grau_mitja":         grau_mitja,
+        "eficiencia_cami":    eficiencia_cami,
+        # Originals
+        "paranys_ponderat":   paranys_ponderat,
+        "ponts_al_cami":      ponts_al_cami,
+        "engany_gradient":    engany_gradient,
+        "cost_abisme":        cost_abisme,
     }
 
 
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # ESTADÍSTICS DE DISTRIBUCIÓ
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
 def calcular_estadistics(valors: list[float]) -> dict:
     """Calcula mínim, màxim, mitjana i percentils d'una llista de valors."""
@@ -136,135 +260,157 @@ def calcular_estadistics(valors: list[float]) -> dict:
         return sorted_v[low] * (1 - frac) + sorted_v[high] * frac
 
     return {
-        "min":    round(sorted_v[0], 2),
-        "max":    round(sorted_v[-1], 2),
-        "mitjana": round(sum(sorted_v) / n, 2),
-        "p25":    round(percentil(25), 2),
-        "p50":    round(percentil(50), 2),
-        "p75":    round(percentil(75), 2),
-        "p90":    round(percentil(90), 2),
+        "min":    round(sorted_v[0], 4),
+        "max":    round(sorted_v[-1], 4),
+        "mitjana": round(sum(sorted_v) / n, 4),
+        "p25":    round(percentil(25), 4),
+        "p50":    round(percentil(50), 4),
+        "p75":    round(percentil(75), 4),
+        "p90":    round(percentil(90), 4),
     }
 
 
-# -------------------------------------------------------------------------
-# AVALUACIÓ AMB LLINDARS PERSONALITZATS
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# AVALUACIÓ AMB LLINDARS PERSONALITZATS (mateixa fórmula que eval.py)
+# ─────────────────────────────────────────────────────────────────────────────
 
-def puntua_amb_llindars(metriques: dict, llindar_estats: float,
-                         llindar_solucio: float, llindar_diametre: float) -> float:
-    """
-    Calcula la puntuació (0–5) igual que eval.py però amb llindars configurables.
+def puntua_amb_llindars(metriques: dict, llindars: dict) -> float:
+    """Calcula la puntuació (0–5) amb llindars configurables.
+
     Usa exactament la mateixa fórmula i pesos que eval.py.
     """
-    n = metriques["num_nodes"]
-    m1 = min(math.log(n + 1) / math.log(llindar_estats + 1), 1.0) if n > 0 else 0.0
+    def normalitza_log(n: float, llindar: float) -> float:
+        return min(math.log(n + 1) / math.log(llindar + 1), 1.0) if n > 0 else 0.0
 
-    dist = metriques["moviments_solucio"]
-    m2 = min(dist / llindar_solucio, 1.0) if llindar_solucio > 0 else 0.0
+    def normalitza_lin(v: float, llindar: float) -> float:
+        return min(v / llindar, 1.0) if llindar > 0 else 0.0
 
-    d = metriques["diametre"]
-    m3 = min(d / llindar_diametre, 1.0) if llindar_diametre > 0 else 0.0
+    m1 = normalitza_log(metriques["num_nodes"],         llindars["estats"])
+    m2 = normalitza_lin(metriques["moviments_solucio"], llindars["solucio"])
+    m3 = normalitza_lin(metriques["diametre"],          llindars["diametre"])
+    m4 = metriques.get("eficiencia_cami", 0.0)          # ja és 0–1
+    m5 = normalitza_lin(metriques["paranys_ponderat"],  llindars["paranys"])
+    m6 = normalitza_lin(metriques["ponts_al_cami"],     llindars["ponts"])
+    m7 = normalitza_lin(metriques["engany_gradient"],   llindars["engany"])
+    m8 = normalitza_lin(metriques["cost_abisme"],       llindars["abisme"])
 
-    # Eficiència del camí: moviments_solucio / diametre (sense llindar extern, ja és 0–1)
-    m4 = metriques.get("eficiencia_cami", 0.0)
-
-    # Mateixos pesos que eval.py: 25% + 45% + 15% + 15% = 100%
-    puntuacio_0_1 = 0.25 * m1 + 0.45 * m2 + 0.15 * m3 + 0.15 * m4
+    puntuacio_0_1 = (
+        0.10 * m1 +
+        0.25 * m2 +
+        0.10 * m3 +
+        0.10 * m4 +
+        0.10 * m5 +
+        0.10 * m6 +
+        0.15 * m7 +
+        0.10 * m8
+    )
     return round(puntuacio_0_1 * 5.0, 3)
 
 
-# -------------------------------------------------------------------------
-# CALIBRACIÓ: ANÀLISI DE PERCENTILS I PROPOSTA DE NOUS LLINDARS
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# CALIBRACIÓ
+# ─────────────────────────────────────────────────────────────────────────────
 
 def analitzar_calibracio(totes_metriques: list[dict]) -> dict:
-    """
-    Analitza la distribució real de les mètriques i proposa nous llindars
-    basant-se en el percentil 80 de cada distribució.
-    """
-    # Recollim valors bruts
-    nodes_vals        = [m["num_nodes"]         for m in totes_metriques]
-    solucio_vals      = [m["moviments_solucio"] for m in totes_metriques]
-    diametre_vals     = [m["diametre"]          for m in totes_metriques]
-    eficiencia_vals   = [m["eficiencia_cami"]   for m in totes_metriques]
+    """Analitza la distribució real i proposa nous llindars (percentil 90)."""
 
-    stats_nodes       = calcular_estadistics(nodes_vals)
-    stats_solucio     = calcular_estadistics(solucio_vals)
-    stats_diametre    = calcular_estadistics(diametre_vals)
-    stats_eficiencia  = calcular_estadistics(eficiencia_vals)
+    camps = {
+        "estats":   "num_nodes",
+        "solucio":  "moviments_solucio",
+        "diametre": "diametre",
+        "paranys":  "paranys_ponderat",
+        "ponts":    "ponts_al_cami",
+        "engany":   "engany_gradient",
+        "abisme":   "cost_abisme",
+    }
+    llindars_actuals = {
+        "estats":   LLINDAR_ESTATS,
+        "solucio":  LLINDAR_SOLUCIO,
+        "diametre": LLINDAR_DIAMETRE,
+        "paranys":  LLINDAR_PARANYS,
+        "ponts":    LLINDAR_PONTS,
+        "engany":   LLINDAR_ENGANY,
+        "abisme":   LLINDAR_ABISME,
+    }
 
-    # Percentil en el qual cau el llindar actual (quants puzzles estan PER SOTA del llindar)
-    def percentil_del_valor(valors: list, llindar: float) -> float:
+    estadistics: dict[str, dict] = {}
+    nous_llindars: dict[str, float] = {}
+
+    for clau, camp in camps.items():
+        valors = [m[camp] for m in totes_metriques]
+        stats = calcular_estadistics(valors)
+        estadistics[clau] = stats
+        nous_llindars[clau] = round(stats["p90"], 4) if stats else llindars_actuals[clau]
+
+    def percentil_del_valor(valors: list[float], llindar: float) -> float:
         per_sota = sum(1 for v in valors if v < llindar)
         return round(100 * per_sota / len(valors), 1) if valors else 0.0
 
-    pct_llindar_estats   = percentil_del_valor(nodes_vals,    LLINDAR_ESTATS)
-    pct_llindar_solucio  = percentil_del_valor(solucio_vals,  LLINDAR_SOLUCIO)
-    pct_llindar_diametre = percentil_del_valor(diametre_vals, LLINDAR_DIAMETRE)
-
-    def classifica_llindar(pct: float) -> str:
-        if pct > 85:   return "⚠️  MASSA LAX (massa fàcil d'arribar a 1.0)"
-        if pct < 40:   return "⚠️  MASSA EXIGENT (gairebé ningú arriba a 1.0)"
+    def classifica(pct: float) -> str:
+        if pct > 85: return "⚠️  MASSA LAX"
+        if pct < 40: return "⚠️  MASSA EXIGENT"
         return "✅ BEN CALIBRAT"
 
-    # Nous llindars proposats: percentil 80 del dataset real
-    nous_llindars = {
-        "llindar_estats":   round(stats_nodes["p90"]),
-        "llindar_solucio":  round(stats_solucio["p90"]),
-        "llindar_diametre": round(stats_diametre["p90"]),
-    }
+    percentils_actuals: dict[str, float] = {}
+    classificacio: dict[str, str] = {}
+    for clau, camp in camps.items():
+        valors = [m[camp] for m in totes_metriques]
+        pct = percentil_del_valor(valors, llindars_actuals[clau])
+        percentils_actuals[clau] = pct
+        classificacio[clau] = classifica(pct)
 
     return {
-        "estadistics": {
-            "nodes":      stats_nodes,
-            "solucio":    stats_solucio,
-            "diametre":   stats_diametre,
-            "eficiencia": stats_eficiencia,
-        },
-        "llindars_actuals": {
-            "estats":   LLINDAR_ESTATS,
-            "solucio":  LLINDAR_SOLUCIO,
-            "diametre": LLINDAR_DIAMETRE,
-        },
-        "percentil_llindars_actuals": {
-            "estats":   pct_llindar_estats,
-            "solucio":  pct_llindar_solucio,
-            "diametre": pct_llindar_diametre,
-        },
-        "classificacio_llindars": {
-            "estats":   classifica_llindar(pct_llindar_estats),
-            "solucio":  classifica_llindar(pct_llindar_solucio),
-            "diametre": classifica_llindar(pct_llindar_diametre),
-        },
-        "nous_llindars_proposats": nous_llindars,
+        "estadistics":               estadistics,
+        "llindars_actuals":          llindars_actuals,
+        "percentil_llindars_actuals": percentils_actuals,
+        "classificacio_llindars":    classificacio,
+        "nous_llindars_proposats":   nous_llindars,
     }
 
 
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # IMPRESSIÓ DE RESULTATS
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
 def imprime_taula_calibracio(calibracio: dict) -> None:
-    """Mostra per pantalla la taula comparativa dels llindars."""
+    """Mostra la taula comparativa dels llindars per pantalla."""
     actuals = calibracio["llindars_actuals"]
     nous    = calibracio["nous_llindars_proposats"]
     pcts    = calibracio["percentil_llindars_actuals"]
     classis = calibracio["classificacio_llindars"]
 
+    etiquetes = [
+        ("estats",   "Nombre d'estats"),
+        ("solucio",  "Moviments sol."),
+        ("diametre", "Diàmetre"),
+        ("paranys",  "Densitat paranys"),
+        ("ponts",    "Ponts crítics"),
+        ("engany",   "Engany gradient"),
+        ("abisme",   "L'abisme"),
+    ]
+
     print()
-    print("═" * 70)
+    print("═" * 78)
     print("  ANÀLISI DE CALIBRACIÓ DELS LLINDARS")
-    print("═" * 70)
-    print(f"  {'MÈTRICA':<18} {'ACTUAL':>10} {'%TILE ACTUAL':>14} {'PROPOSAT':>10}  DIAGNÒSTIC")
-    print("─" * 70)
-    for key, label in [("estats", "Nombre d'estats"), ("solucio", "Moviments sol."), ("diametre", "Diàmetre")]:
-        print(f"  {label:<18} {actuals[key]:>10,} {pcts[key]:>13.1f}% {nous['llindar_' + key]:>10,}  {classis[key]}")
-    print("═" * 70)
+    print("═" * 78)
+    print(f"  {'MÈTRICA':<20} {'ACTUAL':>12} {'%TILE':>8} {'PROPOSAT':>12}  DIAGNÒSTIC")
+    print("─" * 78)
+    for clau, label in etiquetes:
+        actual = actuals[clau]
+        nou    = nous[clau]
+        pct    = pcts[clau]
+        diag   = classis[clau]
+        # Formatem diferent si és enter o float
+        if isinstance(actual, int) or actual == int(actual):
+            print(f"  {label:<20} {int(actual):>12,} {pct:>7.1f}% {int(nou):>12,}  {diag}")
+        else:
+            print(f"  {label:<20} {actual:>12.4f} {pct:>7.1f}% {nou:>12.4f}  {diag}")
+    print("═" * 78)
 
 
 def imprime_histograma(ratings: dict, clau: str = "puntuacio_recalibrada") -> None:
     """Mostra un histograma en text de la distribució de puntuacions."""
-    franges = [0] * 6  # 0–1, 1–2, 2–3, 3–4, 4–5, =5
+    franges = [0] * 6
     for r in ratings.values():
         p = r.get(clau, 0)
         idx = min(int(p), 5)
@@ -276,7 +422,7 @@ def imprime_histograma(ratings: dict, clau: str = "puntuacio_recalibrada") -> No
     print("═" * 50)
     total = sum(franges)
     for i, count in enumerate(franges):
-        rang = f"{i}-{i+1}" if i < 5 else "= 5"
+        rang  = f"{i}-{i+1}" if i < 5 else "= 5"
         barra = "█" * count
         print(f"  {rang:>5} ⭐  {barra:<35} ({count}/{total})")
     print("═" * 50)
@@ -285,23 +431,29 @@ def imprime_histograma(ratings: dict, clau: str = "puntuacio_recalibrada") -> No
 def imprime_bloc_codi(nous_llindars: dict, n_puzzles: int) -> None:
     """Mostra un bloc de Python llest per copiar-enganxar a eval.py."""
     avui = date.today().isoformat()
+    nl = nous_llindars
+
     print()
-    print("═" * 70)
+    print("═" * 78)
     print("  BLOC DE CODI PER COPIAR I ENGANXAR A eval.py")
     print(f"  (calibrat el {avui} amb {n_puzzles} puzzles)")
-    print("─" * 70)
+    print("─" * 78)
     print()
     print(f"    # --- Calibració automàtica {avui} ({n_puzzles} puzzles) ---")
-    print(f"    MAX_ESTATS:   int = {nous_llindars['llindar_estats']}   # nodes")
-    print(f"    MAX_SOLUCIO:  int = {nous_llindars['llindar_solucio']}   # moviments")
-    print(f"    MAX_DIAMETRE: int = {nous_llindars['llindar_diametre']}   # pseudo-diàmetre")
+    print(f"    MAX_ESTATS:   int   = {int(nl['estats'])}   # nodes")
+    print(f"    MAX_SOLUCIO:  int   = {int(nl['solucio'])}   # moviments")
+    print(f"    MAX_DIAMETRE: int   = {int(nl['diametre'])}   # pseudo-diàmetre")
+    print(f"    MAX_PARANYS:  float = {nl['paranys']}   # densitat paranys ponderada")
+    print(f"    MAX_PONTS:    int   = {int(nl['ponts'])}   # ponts en el camí òptim")
+    print(f"    MAX_ENGANY:   int   = {int(nl['engany'])}   # caselles d'allunyament màxim")
+    print(f"    MAX_ABISME:   int   = {int(nl['abisme'])}   # cost màxim de recuperació")
     print()
-    print("═" * 70)
+    print("═" * 78)
 
 
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # PROGRAMA PRINCIPAL
-# -------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     index_path = Path("puzzles/index.json")
@@ -316,9 +468,19 @@ def main() -> None:
     print(f"Analitzant {n_total} puzzles...")
     print()
 
-    totes_metriques: list[dict]    = []
-    resultats_per_puzzle: dict = {}
-    errors: list[str] = []
+    llindars_actuals = {
+        "estats":   LLINDAR_ESTATS,
+        "solucio":  LLINDAR_SOLUCIO,
+        "diametre": LLINDAR_DIAMETRE,
+        "paranys":  LLINDAR_PARANYS,
+        "ponts":    LLINDAR_PONTS,
+        "engany":   LLINDAR_ENGANY,
+        "abisme":   LLINDAR_ABISME,
+    }
+
+    totes_metriques: list[dict] = []
+    resultats_per_puzzle: dict  = {}
+    errors: list[str]           = []
 
     for clau_curta, id_real in sorted(index.items()):
         fitxer = Path(f"puzzles/downloads/{clau_curta}.json")
@@ -330,8 +492,9 @@ def main() -> None:
         print(f"  [{clau_curta}] Processant...", end=" ", flush=True)
 
         try:
-            g = carregar_o_construir_graf(fitxer)
-            metriques = extraure_metriques_brutes(g)
+            g      = carregar_o_construir_graf(fitxer)
+            puzzle = Puzzle.from_json(fitxer.read_text())
+            metriques = extraure_metriques_brutes(g, puzzle)
         except TimeoutError as e:
             print(f"⏱️  {e}")
             errors.append(clau_curta)
@@ -346,40 +509,34 @@ def main() -> None:
             continue
 
         totes_metriques.append(metriques)
-
-        # Puntuació original (amb llindars actuals)
-        puntuacio_original = puntua_amb_llindars(
-            metriques, LLINDAR_ESTATS, LLINDAR_SOLUCIO, LLINDAR_DIAMETRE
-        )
+        puntuacio_original = puntua_amb_llindars(metriques, llindars_actuals)
 
         resultats_per_puzzle[clau_curta] = {
             "id_real":            id_real,
             "metriques":          metriques,
             "puntuacio_original": puntuacio_original,
-            # La puntuació recalibrada s'afegirà més tard
         }
 
-        print(f"nodes={metriques['num_nodes']:,}  sol={metriques['moviments_solucio']}  "
-              f"diam={metriques['diametre']}  ef={metriques['eficiencia_cami']:.2f}  "
-              f"atzucacs={metriques['fraccio_atzucacs']:.2%}  "
-              f"→ {puntuacio_original:.2f}★")
+        print(
+            f"nodes={metriques['num_nodes']:,}  sol={metriques['moviments_solucio']}  "
+            f"diam={metriques['diametre']}  "
+            f"paranys={metriques['paranys_ponderat']:.4f}  "
+            f"ponts={metriques['ponts_al_cami']}  "
+            f"engany={metriques['engany_gradient']}  "
+            f"abisme={metriques['cost_abisme']}  "
+            f"→ {puntuacio_original:.2f}★"
+        )
 
     if not totes_metriques:
         print("❌ No s'ha pogut analitzar cap puzzle.")
         sys.exit(1)
 
-    # Calibració
+    # Calibració i recalcul amb nous llindars
     calibracio = analitzar_calibracio(totes_metriques)
     nous = calibracio["nous_llindars_proposats"]
 
-    # Recalcular puntuacions amb nous llindars
     for clau_curta, data in resultats_per_puzzle.items():
-        data["puntuacio_recalibrada"] = puntua_amb_llindars(
-            data["metriques"],
-            nous["llindar_estats"],
-            nous["llindar_solucio"],
-            nous["llindar_diametre"],
-        )
+        data["puntuacio_recalibrada"] = puntua_amb_llindars(data["metriques"], nous)
 
     # Desar fitxers
     calibracio_path = Path("puzzles/downloads/calibracio.json")
@@ -392,7 +549,7 @@ def main() -> None:
         json.dump(resultats_per_puzzle, f, indent=4)
     print(f"✅ Puntuacions desades a {ratings_path}")
 
-    # Mostrar resultats
+    # Mostrar resultats finals
     imprime_taula_calibracio(calibracio)
     imprime_histograma(resultats_per_puzzle, "puntuacio_recalibrada")
     imprime_bloc_codi(nous, len(totes_metriques))
