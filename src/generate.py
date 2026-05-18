@@ -32,7 +32,7 @@ import os
 
 # Importem les funcions dels nostres propis fitxers
 # IMPORTANT: graph.py ha d'existir a src/ i exportar build_graph()
-from graph import build_graph
+from src.graph_dfs import build_graph
 from puzzle import Puzzle
 
 # Importem la funció de puntuació d'eval.py

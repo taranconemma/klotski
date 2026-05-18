@@ -16,7 +16,7 @@ import time
 from collections import deque
 from pathlib import Path
 
-from graph_tool.all import Graph, Vertex  # type:ignore
+from graph_tool.all import Graph, Vertex # type:ignore
 
 from logic import possible_moves, apply_move, is_goal
 from puzzle import Puzzle, State, Piece, Coord

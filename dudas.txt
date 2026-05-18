@@ -5,6 +5,7 @@ lo de las properties del graph.py para que sirve y esta bien o se tiene que hace
 como que graph tools es mas rapido con el shortest_path solo porque esta implementado en C++ y es 30 veces mas rapido calcular todas las distancias que hacer un bfs de toda la vida
 El graph tools deberia ser solo los algorimos para el eval y en el solve hacerlo a mano?? asi ponemos bfs para el solve y dfs para el graf
 Porque en el readme pone dfs??
+El dfs es peor porque puede dar recursion error??
 
 EVAL:
 preguntar que criterios han usado para el eval???
