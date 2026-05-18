@@ -11,6 +11,9 @@ preguntar que criterios han usado para el eval???
 ejemplos para justificar el eval
 en las funciones del eval las especificaciones deben mencionar los parametros
 cambiar los nomrbes suenan muy chat
+como funciona la distacnia de manhattan
+ns que betweenness y clostness y klustering
+quitar el type ignore?
 
 
 

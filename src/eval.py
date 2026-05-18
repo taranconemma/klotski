@@ -23,7 +23,7 @@ Mesures implementades:
 
 import math
 import sys
-import numpy as np
+from numpy import full, where, minimum, inf
 from pathlib import Path
 
 from graph_tool.all import Graph, Vertex, load_graph, shortest_distance, shortest_path, pseudo_diameter, label_biconnected_components
@@ -122,20 +122,20 @@ def mesura_densitat_paranys(graf: Graph) -> float:
     Retorna un valor entre 0.0 i 1.0.
     """
     n = graf.num_vertices()
-    goal_indices = np.where(graf.vp["is_goal"].a)[0]
+    goal_indices = where(graf.vp["is_goal"].a)[0]
 
     # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
-    dists_min = np.full(n, np.inf)
+    dists_min = full(n, inf)
     for goal_idx in goal_indices:
         dists = shortest_distance(graf, source=goal_idx)
-        dists_min = np.minimum(dists_min, dists.a)
+        dists_min = minimum(dists_min, dists.a)
 
     # Obtenim els graus de tots els vèrtexs
     graus = graf.get_out_degrees(graf.get_vertices())
     paranys = (graus == 1)
     
     # Calculem la suma dels pesos de forma: pes(p) = 1 / (1 + dist_al_goal_més_proper(p))
-    suma_pesos = float(np.sum(1.0 / (1.0 + dists_min[paranys])))
+    suma_pesos = float(sum(1.0 / (1.0 + dists_min[paranys])))
     fraccio = suma_pesos / n
     return min(fraccio / MAX_PARANYS, 1.0)
 
@@ -165,7 +165,7 @@ def mesura_ponts_critics( graf: Graph, node_inici: Vertex, nodes_objectiu: list[
 
 
 def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
-    """Suma de distàncies de Manhattan de cada peça objectiu a la seva meta."""
+    """Suma de distàncies de Manhattan de cada peça a la meta."""
     total = 0
     for i, pos_meta in puzzle.goals:
         px, py = state.positions[i]
@@ -173,23 +173,13 @@ def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
         total += abs(px - mx) + abs(py - my)
     return total
 
+def mesura_engany_gradient(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objectiu: list[Vertex], distancies_des_de_inici: object) -> float:
+    """ Mesura 7 — Engany del gradient (miratge).
 
-def mesura_engany_gradient(
-    graf: Graph,
-    puzzle: Puzzle,
-    node_inici: Vertex,
-    nodes_objectiu: list[Vertex],
-    distancies_des_de_inici: object,
-) -> float:
-    """Mesura 7 — Engany del gradient (miratge).
-
-    Una heurística naïf és la distància de Manhattan de la peça objectiu
+    Una heurística poc eficient és la distància de Manhattan de la peça objectiu
     a la seva meta. Mesurem fins a quin punt el camí òptim s'allunya
     d'aquesta heurística: si per resoldre el puzzle cal allunyar la peça
     objectiu de la meta, el puzzle és contraintuïtiu i satisfactori.
-
-    Fórmula:
-        engany = max(heuristica al llarg del camí) - heuristica_inicial
 
     Un valor alt vol dir que en algun punt del camí la peça objectiu estava
     molt més lluny de la meta que a l'inici: el jugador havia de "anar enrere"
@@ -198,36 +188,21 @@ def mesura_engany_gradient(
     Retorna un valor entre 0.0 i 1.0.
     """
     best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
-    _, path_edges = shortest_path(graf, node_inici, best_goal)
+    nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
 
-    if not path_edges:
+    if not nodes_cami:
         return 0.0
-
-    # Recollim els nodes del camí (en ordre)
-    nodes_cami: list[Vertex] = [node_inici]
-    for e in path_edges:
-        # Com el graf no és dirigit, el node destí és el que no hem visitat
-        s, t = e.source(), e.target()
-        nodes_cami.append(t if t != nodes_cami[-1] else s)
 
     # Heurística en cada pas del camí
     h_inicial = _heuristica_manhattan(puzzle, graf.vp["state"][node_inici])
-    h_max = h_inicial
-    for v in nodes_cami[1:]:
-        h = _heuristica_manhattan(puzzle, graf.vp["state"][v])
-        if h > h_max:
-            h_max = h
+    h_max = max(_heuristica_manhattan(puzzle, graf.vp["state"][v]) for v in nodes_cami)
 
+    # Fórmula: engany = max(heuristica al llarg del camí) - heuristica_inicial
     engany = h_max - h_inicial
     return min(engany / MAX_ENGANY, 1.0)
 
 
-def mesura_labisme(
-    graf: Graph,
-    node_inici: Vertex,
-    nodes_objectiu: list[Vertex],
-    distancies_des_de_inici: object,
-) -> float:
+def mesura_labisme(graf: Graph, node_inici: Vertex, nodes_objectiu: list[Vertex], distancies_des_de_inici: object) -> float:
     """ Mesura 8 — L'abisme: cost de recuperar-se d'un error en el camí òptim.
 
     Per a cada node del camí òptim, calculem el cost de fer un moviment
@@ -241,42 +216,25 @@ def mesura_labisme(
     on un pas en fals es més costós.
 
     Un puzzle on qualsevol error costa 30+ moviments per recuperar-se és
-    molt més dur psicològicament.
+    molt més complicat i interessant.
 
     Retorna un valor entre 0.0 i 1.0.
     """
     best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
-    _, path_edges = shortest_path(graf, node_inici, best_goal)
-
-    if len(path_edges) < 2:
+    nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
+    if len(nodes_cami) < 3:
         return 0.0
 
-    # Construïm el camí com a llista ordenada de nodes i un set per cerques ràpides
-    nodes_cami: list[Vertex] = [node_inici]
-    for e in path_edges:
-        s, t = e.source(), e.target()
-        nodes_cami.append(t if t != nodes_cami[-1] else s)
-
-    nodes_cami_ids: set[int] = {int(v) for v in nodes_cami}
-
-    # Per cada node del camí (excepte el final), mirem els veïns fora del camí
+    nodes_cami_set = set(nodes_cami)
     pitjor_cost = 0
 
     for idx_cami, v in enumerate(nodes_cami[:-1]):
         for vei in v.out_neighbors():
-            if int(vei) in nodes_cami_ids:
-                continue
-
-            # Cost de sortir al veí (1 moviment) i tornar al camí més proper
-            # (des del punt actual fins al final, no des de l'inici)
-            dist_vei_a_cami = min(
-                int(shortest_distance(graf, source=vei)[u])
-                for u in nodes_cami[idx_cami + 1:]
-            )
-
-            cost_total = 1 + dist_vei_a_cami
-            if cost_total > pitjor_cost:
-                pitjor_cost = cost_total
+            if vei not in nodes_cami_set:
+                # Cost de sortir al veí (1 moviment) i tornar al camí més proper
+                # (des del punt actual fins al final, no des de l'inici)
+                dist_vei_a_cami = shortest_distance(graf, source=vei, target=nodes_cami[idx_cami + 1:]).min()
+                pitjor_cost = max(pitjor_cost, 1 + dist_vei_a_cami)
 
     return min(pitjor_cost / MAX_ABISME, 1.0)
 

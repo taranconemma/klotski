@@ -1,4 +1,4 @@
-p = 02
+p = 57
 m = "comentari"
 score = auto
 token = "019d90b1-6aab-7000-a340-4ba3cc79679a"

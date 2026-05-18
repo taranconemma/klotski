@@ -86,11 +86,7 @@ def _nodes_cami_optim(
 ) -> list[gt.Vertex]:
     """Retorna els nodes del camí òptim des de l'inici al goal més proper."""
     best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
-    _, path_edges = shortest_path(g, node_inici, best_goal)
-    nodes: list[gt.Vertex] = [node_inici]
-    for e in path_edges:
-        s, t = e.source(), e.target()
-        nodes.append(t if t != nodes[-1] else s)
+    nodes, _ = shortest_path(g, node_inici, best_goal)
     return nodes
 
 
@@ -199,15 +195,10 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
     engany_gradient = 0
     if nodes_objectiu and g.vp.get("state"):
         nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
-        h_inicial = _heuristica_manhattan(puzzle, g.vp["state"][node_inici])
-        h_max = h_inicial
-        for v in nodes_cami[1:]:
-            estat = g.vp["state"][v]
-            if estat is not None:
-                h = _heuristica_manhattan(puzzle, estat)
-                if h > h_max:
-                    h_max = h
-        engany_gradient = h_max - h_inicial
+        if nodes_cami:
+            h_inicial = _heuristica_manhattan(puzzle, g.vp["state"][node_inici])
+            h_max = max(_heuristica_manhattan(puzzle, g.vp["state"][v]) for v in nodes_cami if g.vp["state"][v] is not None)
+            engany_gradient = h_max - h_inicial
 
     # ── Mètrica 8: L'abisme ──────────────────────────────────────────────
     # Pitjor cost (anar + tornar) de fer un pas en fals en el camí òptim.
@@ -215,19 +206,14 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
     cost_abisme = 0
     if nodes_objectiu and num_nodes >= 3:
         nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
-        nodes_cami_ids: set[int] = {int(v) for v in nodes_cami}
+        if len(nodes_cami) >= 3:
+            nodes_cami_set = set(nodes_cami)
 
-        for idx_cami, v in enumerate(nodes_cami[:-1]):
-            for vei in v.out_neighbors():
-                if int(vei) in nodes_cami_ids:
-                    continue
-                dist_vei_a_cami = min(
-                    int(shortest_distance(g, source=vei)[u])
-                    for u in nodes_cami[idx_cami + 1:]
-                )
-                cost = 1 + dist_vei_a_cami
-                if cost > cost_abisme:
-                    cost_abisme = cost
+            for idx_cami, v in enumerate(nodes_cami[:-1]):
+                for vei in v.out_neighbors():
+                    if vei not in nodes_cami_set:
+                        dist_vei_a_cami = shortest_distance(g, source=vei, target=nodes_cami[idx_cami + 1:]).min()
+                        cost_abisme = max(cost_abisme, 1 + dist_vei_a_cami)
 
     return {
         # Clàssiques
