@@ -23,10 +23,10 @@ Mesures implementades:
 
 import math
 import sys
-from numpy import full, where, minimum, inf
+from numpy import array, where, minimum, inf
 from pathlib import Path
 
-from graph_tool.all import Graph, Vertex, load_graph, shortest_distance, shortest_path, pseudo_diameter, label_biconnected_components
+from graph_tool.all import Graph, Vertex, load_graph, shortest_distance, shortest_path, pseudo_diameter, label_biconnected_components  #type:ignore
 from collections import Counter
 
 from graph import build_graph
@@ -125,7 +125,7 @@ def mesura_densitat_paranys(graf: Graph) -> float:
     goal_indices = where(graf.vp["is_goal"].a)[0]
 
     # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
-    dists_min = full(n, inf)
+    dists_min = array(n, inf)
     for goal_idx in goal_indices:
         dists = shortest_distance(graf, source=goal_idx)
         dists_min = minimum(dists_min, dists.a)
@@ -189,9 +189,7 @@ def mesura_engany_gradient(graf: Graph, puzzle: Puzzle, node_inici: Vertex, node
     """
     best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
     nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
-
-    if not nodes_cami:
-        return 0.0
+    if not nodes_cami:  return 0.0
 
     # Heurística en cada pas del camí
     h_inicial = _heuristica_manhattan(puzzle, graf.vp["state"][node_inici])
@@ -220,10 +218,10 @@ def mesura_labisme(graf: Graph, node_inici: Vertex, nodes_objectiu: list[Vertex]
 
     Retorna un valor entre 0.0 i 1.0.
     """
+
     best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
     nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
-    if len(nodes_cami) < 3:
-        return 0.0
+    if len(nodes_cami) < 3: return 0.0
 
     nodes_cami_set = set(nodes_cami)
     pitjor_cost = 0
