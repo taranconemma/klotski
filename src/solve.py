@@ -42,8 +42,7 @@ def solve(g: Graph) -> list[tuple[int, str, int]] | None:
 
 
 
-if __name__ == "__main__":
-
+def main() -> None:
     graphml_path = Path(sys.argv[1])
 
     # El fitxer de sortida es generarà automàticament canviant l'extensió a .sol.json
@@ -51,8 +50,8 @@ if __name__ == "__main__":
 
     # Si la solució ja existeix, no fem res
     if output_path.exists():
-        print(f"La solució ja existeix.")
-        sys.exit(0)
+        print("La solució ja existeix.")
+        return
 
     g = load_graph(str(graphml_path))
     # Mostrem per pantalla alguna informació rellevant del graf
@@ -62,10 +61,14 @@ if __name__ == "__main__":
 
     if moves is None:
         print("El puzzle no té solució.")
-        sys.exit(0)
+        return
 
     print(f"Solució: {len(moves)} moviments")
 
     # Escrivim la solució al fitxer de sortida
     # Format: [[peça, direcció, distància], ...]
     Path(output_path).write_text(json.dumps([[p, d, dist] for p, d, dist in moves]))
+
+
+if __name__ == "__main__":
+    main()

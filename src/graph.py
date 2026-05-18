@@ -120,13 +120,13 @@ def build_graph(puzzle: Puzzle) -> Graph:
         current_key = state_key(puzzle, current)
         current_v = key_to_v[current_key]
 
-        #REVISASR
         # Comprovació de timeout (cada node processat)
+        # Si ha passat massa temps, s'atura el programa i ens diu que el puzzle té molts estats
+        # Per desactivar el límit, s'ha de posar TIMEOUT_ACTIVAT = False al principi d'aquest fitxer
         if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
             raise TimeoutError(
                 f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. "
-                f"El puzzle té molts estats (ja n'hi ha {g.num_vertices():,} processats). "
-                "Per desactivar el límit, canvia TIMEOUT_ACTIVAT = False a graph.py."
+                f"El puzzle té molts estats (ja s'han processat {g.num_vertices():,} estats (nodes)). "
             )
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
@@ -147,7 +147,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
                 visited.add(next_key)
                 queue.append(next_state)
 
-    # Registrar propietats al graf
+    # Registrar propietats al graf: Assignar valors
     g.vertex_properties["state"]    = vp_state
     g.vertex_properties["is_start"] = vp_is_start
     g.vertex_properties["is_goal"]  = vp_is_goal
@@ -159,6 +159,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
 
 
 def print_summary(puzzle: Puzzle, g: Graph) -> None:
+    ''' Mostra per pantalla informació rellevant sobre el puzzle i del graf que s'ha construït. '''
     n_goals = sum(1 for v in g.vertices() if g.vp["is_goal"][v])
     print(f"Taulell:         {puzzle.W}×{puzzle.H}")
     print(f"Peces:           {len(puzzle.pieces)}")
@@ -167,23 +168,14 @@ def print_summary(puzzle: Puzzle, g: Graph) -> None:
     print(f"Nodes finals:    {n_goals}")
 
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        sys.exit(f"Ús: python {sys.argv[0]} <puzzle.json>")
-
+def main() -> None:
     json_path = Path(sys.argv[1])
-    if not json_path.exists():
-        sys.exit(f"Error: no s'ha trobat {json_path}")
-
     puzzle = Puzzle.from_json(json_path.read_text())
-
-    # El fitxer de sortida es generarà automàticament canviant l'extensió a .graphml
     output_path = json_path.with_suffix(".graphml")
-
+    
     if output_path.exists():
-        print(f"✅ El graf ja existeix: {output_path}")
-        print("   (Ometent la construcció...)")
-        sys.exit(0)
+        print("El graf ja existeix.")
+        return
 
     print(f"Construint el graf per: {json_path}")
     try:
@@ -195,3 +187,7 @@ if __name__ == "__main__":
 
     g.save(str(output_path))
     print(f"Graf guardat a: {output_path}")
+
+
+if __name__ == "__main__":
+    main()
