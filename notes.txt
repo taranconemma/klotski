@@ -47,6 +47,8 @@ incloent les peces objectiu. Això feia que l'estat on la peça objectiu està a
     indistingibles, passem de comptar les posicions com a permutacions P(n,k) a
     comptar-les com a combinacions C(n,k). La relació P(n,k) = C(n,k) * k! demostra
     que eliminem exactament les k! formes redundants d'ordenar aquestes peces.
+    Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
+
 
 
  IMPORTANTE: no subir los graphs.html porque revientan el github

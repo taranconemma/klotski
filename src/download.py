@@ -31,27 +31,3 @@ for id in ids:
 with open("puzzles/index.json", "w") as f:
     json.dump(index_puzzles, f, indent=4)
 print("Índex guardat a puzzles/index.json")
-
-
-#ALTERNATIVA: demanant imports directament (s'ha d'instal·lar requests)
-# import requests
-# import json
-# import os
-
-# BASE_URL = "https://klotski.pauek.dev"
-
-# # 1. Obtenir els 100 IDs
-# response = requests.get(f"{BASE_URL}/api/puzzles")
-# ids : list[str] = response.json()
-
-# # 2. Descarregar cada puzzle
-# os.makedirs("puzzles", exist_ok=True)
-
-# for id in ids:
-#     response = requests.get(f"{BASE_URL}/api/puzzles/{id}")
-#     puzzle = response.json()
-    
-#     with open(f"puzzles/{id}.json", "w") as f:
-#         json.dump(puzzle, f)
-    
-#     print(f"Descarregant puzzle {id}")

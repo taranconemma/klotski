@@ -1,44 +1,29 @@
-Es mejor generar el graf y usarlo para el solve o el solve y que cuando encuentre la respuesta pare?
+
+GRAF:
 Entonces es mejor un dfs o bfs (si queremos pasos minimos)
-
-que es esto del parser
-hay que usar Astar??
-preguntar que criterios han usado para el eval???
-creo que el graph se necesta para evaluar para el solve basta con un astar
-Tema del timeout????
-mirar si se esta aprovechando bien todas las cosas del graph.tools -> RESOLT (s'ha optimitzat solve.py usant shortest_path natiu en C++ de graph-tool)
-ejemplos para justificar el eval
-cambia los m4 por m3 
-en las funciones del eval las especificaciones deben mencionar los parametros
-mirar todos los sitios donde deberia ir un type alias
-el graf solo tiene nnodos a los que se puede llegar, por tanto en el solve deberia tener en cuenta nodos con distancias infinitas?
-como que graph tools es mas rapido con el shortest_path solo porque esta implementado en C++ y es 30 veces mas rapido calcular todas las distancias que hacer un bfs de toda la vida
-el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
 lo de las properties del graph.py para que sirve y esta bien o se tiene que hacer a mano??
-
+como que graph tools es mas rapido con el shortest_path solo porque esta implementado en C++ y es 30 veces mas rapido calcular todas las distancias que hacer un bfs de toda la vida
 El graph tools deberia ser solo los algorimos para el eval y en el solve hacerlo a mano?? asi ponemos bfs para el solve y dfs para el graf
+Porque en el readme pone dfs??
 
-Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
+EVAL:
+preguntar que criterios han usado para el eval???
+ejemplos para justificar el eval
+en las funciones del eval las especificaciones deben mencionar los parametros
 
-la funcion normalized del puzzle.py donde se usa
 
-no me funciona el View: me funcionan el sample3, el 4 ahora se ve muy feo todo esparcido
 
-TREES: clase que me salté
-    - Red-Black Trees lo explicó?? Hay que saber qué son??
-    - A qué se refiere con rotation??
+OTROS:
+Tema del timeout????
+el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
+hay que hacer tests???
 
-PREGUNTAR POR LA PROVA DE LAB DE COMPUS
 
-Mensaje Lola: holaa, sé que queda molt pero per anar-me organitzant
-            la classe del dimarts 26 que es just abans del final de mates la podríem fer bastant d'hora?
-            A les 15:00 o així fins a les 17:00 si vols fer 2 hores? Perquè m'estan demanant fer altres classe i si no no em donaria temps
-            Si no et va bé em dius i miro d'organitzar-ho direfent. 
+COSAS PENDIENTES:
+mirar todos los sitios donde deberia ir un type alias
+tests
 
-Mensaje Ricard: holaa la classe de aquest dilluns com la de sempre i la del 25 et va bé fer de 16:00 a 18:00?? 
-                La del dimarts 26 puc només de 17:45 a 19:15 si et va bé. 
-Preguntar si la Laia irá al tiro el 25 de mayo.
-Averiguar a qué hora hay que llegar al concierto y quien nos lleva? (Pone que empieza a las 20:30)
+
 
 
 
