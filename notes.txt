@@ -26,12 +26,6 @@ Para crear el repositorio de github:
         
 
 
-git add src/graph.py src/solve.py
-git commit -m "Afegir graph.py i solve.py"
-git push origin main
-
-
-
 El primer codigo que me habia hehco claude dibujaba el grafo arbol que encontraba el bfs 
 pero i si a mi me interesa con todas sus aristas??
 
