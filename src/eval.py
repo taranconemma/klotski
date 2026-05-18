@@ -23,7 +23,7 @@ Mesures implementades:
 
 import math
 import sys
-from numpy import array, where, minimum, inf
+from numpy import full, where, minimum, inf
 from pathlib import Path
 
 from graph_tool.all import Graph, Vertex, load_graph, shortest_distance, shortest_path, pseudo_diameter, label_biconnected_components  #type:ignore
@@ -125,7 +125,7 @@ def mesura_densitat_paranys(graf: Graph) -> float:
     goal_indices = where(graf.vp["is_goal"].a)[0]
 
     # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
-    dists_min = array(n, inf)
+    dists_min = full(n, inf)
     for goal_idx in goal_indices:
         dists = shortest_distance(graf, source=goal_idx)
         dists_min = minimum(dists_min, dists.a)

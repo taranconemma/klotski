@@ -23,14 +23,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-import graph_tool.all as gt
-from graph_tool.all import (
-    shortest_distance,
-    shortest_path,
-    label_components,
-    label_biconnected_components,
-    pseudo_diameter,
-)
+from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, Vertex, load_graph #type:ignore
 
 from graph import build_graph, TIMEOUT_SEGONS
 from puzzle import Puzzle, State
@@ -53,11 +46,11 @@ LLINDAR_ABISME:   int   = 40
 # CÀRREGA DEL GRAF (reutilitzant la caché de .graphml)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def carregar_o_construir_graf(fitxer_json: Path) -> gt.Graph:
+def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
     """Carrega el graf des del .graphml si existeix, altrament el construeix i el desa."""
     graphml_path = fitxer_json.with_suffix(".graphml")
     if graphml_path.exists():
-        return gt.load_graph(str(graphml_path))
+        return load_graph(str(graphml_path))
     puzzle = Puzzle.from_json(fitxer_json.read_text())
     g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
     g.save(str(graphml_path))
@@ -79,11 +72,11 @@ def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
 
 
 def _nodes_cami_optim(
-    g: gt.Graph,
-    node_inici: gt.Vertex,
-    nodes_objectiu: list[gt.Vertex],
+    g: Graph,
+    node_inici: Vertex,
+    nodes_objectiu: list[Vertex],
     dist_inici: object,
-) -> list[gt.Vertex]:
+) -> list[Vertex]:
     """Retorna els nodes del camí òptim des de l'inici al goal més proper."""
     best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
     nodes, _ = shortest_path(g, node_inici, best_goal)
@@ -94,7 +87,7 @@ def _nodes_cami_optim(
 # EXTRACCIÓ DE MÈTRIQUES EN BRUT (totes en un sol pas per eficiència)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
+def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
     """Extreu totes les mètriques numèriques reals d'un graf (sense normalitzar).
 
     Retorna un diccionari amb:
