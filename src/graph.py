@@ -81,7 +81,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
     g.ep.direction = g.new_edge_property("string")
     g.ep.distance = g.new_edge_property("int")
     g.gp.puzzle = g.new_graph_property("string")
-    g.gp.puzzle[g] = puzzle.to_json()
+    g.gp.puzzle = puzzle.to_json()
 
     key_to_v: dict[StateKey, Vertex] = {}
 
