@@ -119,15 +119,29 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
     nodes_objectiu = [v for v in g.vertices() if g.vp["is_goal"][v]]
     num_goals     = len(nodes_objectiu)
 
-    INF = 2**31 - 1
+    if not nodes_objectiu:
+        return {
+            # Clàssiques
+            "num_nodes":          num_nodes,
+            "num_arestes":        num_arestes,
+            "num_goals":          0,
+            "moviments_solucio":  0,
+            "diametre":           0,
+            "fraccio_atzucacs":   0.0,
+            "grau_mitja":         0.0,
+            "eficiencia_cami":    0.0,
+            # Originals
+            "paranys_ponderat":   0.0,
+            "ponts_al_cami":      0,
+            "engany_gradient":    0,
+            "cost_abisme":        0,
+        }
 
     # ── Mètriques clàssiques ──────────────────────────────────────────────
 
     dist_inici = shortest_distance(g, source=node_inici)
 
-    moviments_solucio = 0
-    if nodes_objectiu:
-        moviments_solucio = min(int(dist_inici[v]) for v in nodes_objectiu)
+    moviments_solucio = min(int(dist_inici[v]) for v in nodes_objectiu)
 
     diametre = 0
     if num_nodes >= 2:
@@ -144,21 +158,26 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
     # ── Mètrica 5: Densitat de paranys ───────────────────────────────────
     # Cada cul-de-sac es pondera per la seva proximitat al goal més proper.
 
-    dist_al_goal: dict[int, int] = {}
-    for goal_v in nodes_objectiu:
-        dg = shortest_distance(g, source=goal_v)
-        for v in g.vertices():
-            idx = int(v)
-            d = int(dg[v])
-            if idx not in dist_al_goal or d < dist_al_goal[idx]:
-                dist_al_goal[idx] = d
+    import numpy as np
 
-    suma_paranys = 0.0
-    for v in g.vertices():
-        if v.out_degree() == 1:
-            d = dist_al_goal.get(int(v), INF)
-            if d < INF:
-                suma_paranys += 1.0 / (1.0 + d)
+    # Obtenim els índexs dels nodes objectiu directament des del graf
+    goal_indices = np.where(g.vp["is_goal"].a)[0]
+    
+    # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
+    dists_min = np.full(num_nodes, np.inf)
+    if len(goal_indices) > 0:
+        for goal_idx in goal_indices:
+            dg = shortest_distance(g, source=goal_idx)
+            dists_min = np.minimum(dists_min, dg.a)
+
+    # Obtenim els graus de tots els vèrtexs
+    graus = g.get_out_degrees(g.get_vertices())
+    
+    # Filtrem només els culs-de-sac (grau 1)
+    paranys = (graus == 1)
+    
+    # Calculem la suma dels pesos de forma vectoritzada
+    suma_paranys = float(np.sum(1.0 / (1.0 + dists_min[paranys])))
     paranys_ponderat = round(suma_paranys / num_nodes, 6) if num_nodes > 0 else 0.0
 
     # ── Mètrica 6: Ponts crítics en el camí òptim ────────────────────────
@@ -166,25 +185,13 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
 
     ponts_al_cami = 0
     if nodes_objectiu and num_nodes >= 2:
+        from collections import Counter
         comp_aresta, _, _ = label_biconnected_components(g)
-        compte_per_comp: dict[int, int] = {}
-        for e in g.edges():
-            c = int(comp_aresta[e])
-            compte_per_comp[c] = compte_per_comp.get(c, 0) + 1
-
-        arestes_pont: set[tuple[int, int]] = set()
-        for e in g.edges():
-            c = int(comp_aresta[e])
-            if compte_per_comp[c] == 1:
-                s, t = int(e.source()), int(e.target())
-                arestes_pont.add((min(s, t), max(s, t)))
+        counts = Counter(comp_aresta.a)
 
         best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
         _, path_edges = shortest_path(g, node_inici, best_goal)
-        for e in path_edges:
-            s, t = int(e.source()), int(e.target())
-            if (min(s, t), max(s, t)) in arestes_pont:
-                ponts_al_cami += 1
+        ponts_al_cami = sum(1 for e in path_edges if counts[comp_aresta[e]] == 1)
 
     # ── Mètrica 7: Engany del gradient ───────────────────────────────────
     # Màxim allunyament de la heurística de Manhattan al llarg del camí òptim.
@@ -211,7 +218,6 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
         nodes_cami_ids: set[int] = {int(v) for v in nodes_cami}
 
         for idx_cami, v in enumerate(nodes_cami[:-1]):
-            dists_des_de_v = shortest_distance(g, source=v)
             for vei in v.out_neighbors():
                 if int(vei) in nodes_cami_ids:
                     continue
@@ -219,10 +225,9 @@ def extraure_metriques_brutes(g: gt.Graph, puzzle: Puzzle) -> dict:
                     int(shortest_distance(g, source=vei)[u])
                     for u in nodes_cami[idx_cami + 1:]
                 )
-                if dist_vei_a_cami < INF:
-                    cost = 1 + dist_vei_a_cami
-                    if cost > cost_abisme:
-                        cost_abisme = cost
+                cost = 1 + dist_vei_a_cami
+                if cost > cost_abisme:
+                    cost_abisme = cost
 
     return {
         # Clàssiques

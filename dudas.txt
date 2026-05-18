@@ -23,6 +23,7 @@ hay que hacer tests???
 COSAS PENDIENTES:
 mirar todos los sitios donde deberia ir un type alias
 tests
+poner asserts 
 
 
 

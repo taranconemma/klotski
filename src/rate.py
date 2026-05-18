@@ -1,34 +1,19 @@
-# rate.py. Donat un identificador de puzzle del repositori, 
-# envia una valoració entre 0 i 5 estrelles.
-
 """
-rate.py — Envia la valoració d'un puzzle al repositori de Klotski
+rate.py — Donat un identificador de puzzle del repositori, envia una 
+valoració entre 0 i 5 estrelles.
 
-Uso:
+Utilització:
     python src/rate.py <id_puzzle> <puntuació> <el_teu_token>
 
-    O bé amb el token en una variable d'entorn (recomanat, més segur):
-        export KLOTSKI_TOKEN="el_teu_token_aqui"
-        python src/rate.py klotski 4.5
-
 Arguments:
-    id_puzzle   Identificador del puzzle al repositori (ex: "klotski", "sample1") o el seu índex numèric ("50")
-    puntuació   Valor entre 0.0 i 5.0 (p.ex. 3.5), o la paraula "auto" per auto-avaluar
-    token       El token personal per autenticar-se (opcional si s'usa la variable d'entorn KLOTSKI_TOKEN)
+    id_puzzle   Identificador del puzzle al repositori (guardats a puzzles/downloads/index.json)
+    puntuació   Valor entre 0.0 i 5.0
+    token       El token personal per autenticar-se 
 
 Què fa:
     Fa una petició HTTP POST al servidor https://klotski.pauek.dev
     amb l'identificador del puzzle, el token i la puntuació.
-    El servidor guarda la vostra valoració (o la sobreescriu si ja n'hi havia una).
-
-Per qué és útil:
-    Permet contribuir al rànking col·laboratiu dels puzzles.
-    Totes les valoracions dels estudiants s'acumulen i generen
-    una mitjana que classifica els puzzles del millor al pitjor.
-
-IMPORTANT:
-    Necessiteu un token personal que us donarà el professor per email.
-    No compartiu el token amb ningú — identifica les vostres contribucions.
+    El servidor guarda la valoració (o la sobreescriu si ja n'hi havia una).
 """
 
 import sys
@@ -38,51 +23,27 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
-# URL base del servidor de la pràctica
 SERVIDOR = "https://klotski.pauek.dev"
 
-
-def envia_valoracio(id_puzzle, puntuacio, token):
-    """
-    Envia una valoració per a un puzzle al servidor.
+def envia_valoracio(id_puzzle: str, puntuacio: float, token: str) -> bool:
+    """ Envia una valoració per a un puzzle al servidor.
 
     Paràmetres:
-        id_puzzle  (str):   Identificador del puzzle (ex: "klotski")
+        id_puzzle  (str):   Identificador del puzzle
         puntuacio  (float o int): Valor entre 0.0 i 5.0
         token      (str):   Token personal d'autenticació
 
-    Retorna:
-        True si l'enviament ha anat bé, False si hi ha hagut algun error.
-    """
+    Retorna True si l'enviament ha anat bé, False si hi ha hagut algun error. """
     # Comprovem que la puntuació és vàlida
     if not (0.0 <= puntuacio <= 5.0):
         print(f"Error: la puntuació ha de ser entre 0.0 i 5.0 (rebuda: {puntuacio})")
         return False
 
-    # Construïm la URL de l'endpoint
-    # Segons el README: POST /api/puzzles/[ID]/votes
     url = f"{SERVIDOR}/api/puzzles/{id_puzzle}/votes"
-
-    # Preparem el cos de la petició en format JSON
-    # El servidor espera la clau 'stars' i que el valor sigui un INT
-    dades = {
-        "stars": int(puntuacio)
-    }
-    cos_json = json.dumps(dades).encode("utf-8")  # Convertim a bytes
-
-    # Creem la petició HTTP amb les capçaleres necessàries
-    # La capçalera "Authorization" porta el token per identificar-nos
-    peticio = urllib.request.Request(
-        url,
-        data=cos_json,
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        }
-    )
-
-    # Fem la petició i gestionem els possibles errors
+    dades = {"stars": int(puntuacio)}
+    cos_json = json.dumps(dades).encode("utf-8")
+    peticio = urllib.request.Request(url, data=cos_json, method="POST", headers={ "Content-Type": "application/json", "Authorization": f"Bearer {token}", })
+    
     try:
         with urllib.request.urlopen(peticio) as resposta:
             codi = resposta.getcode()

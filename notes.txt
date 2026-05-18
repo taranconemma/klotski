@@ -113,3 +113,11 @@ Després, llança un segon BFS des de $v$ per trobar el node més llunyà possib
 La distància entre $v$ i $w$ és el pseudo-diàmetre! (De vegades repeteix aquest procés 2 o 3 vegades més per assegurar-se).
 El gran avantatge:
 En lloc de fer 50.000 BFS, el pseudo-diàmetre només en fa 2 o 3 en total. Això fa que trigui mil·lisegons (0.01 segons) en lloc d'hores! Per al Klotski, on els grafs d'estats poden créixer moltíssim, utilitzar el diàmetre real seria inviable, mentre que el pseudo-diàmetre és instantani i perfecte.
+
+
+
+EXPLICAR QUE SE USA EL COUNTER DONDE LOS PONTS CRITICS
+# Counter compta la mida de cada component biconectada del graf.
+    # Les components de mida 1 són, per definició, arestes pont.
+    # Això ens estalvia recórrer manualment tot el conjunt d'arestes
+    # dues vegades, fent que la detecció sigui immediata i neta.
