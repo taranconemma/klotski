@@ -71,22 +71,17 @@ def build_graph(puzzle: Puzzle) -> Graph:
     Propietat global del graf:
         puzzle - JSON del puzzle (per poder-lo recuperar des de 3D_view.py)
     """
-    g = Graph(directed=False) #fem servir el 'tipus' Graph del mòdul graph_tool per facilitar la visulitzacióposterior amb 3D_view.py
+    g = Graph(directed=False)
     
-    # Aquestes propietats s'han de declarar com si fossin atribut perquè després hi poguem doanr valors i utilitzar-les
-    # Propietats dels nodes: cada node tindrà aquestes variables (son com atributs) i els hem de 'declarar'
-    vp_state    = g.new_vertex_property("object") 
-    vp_is_start = g.new_vertex_property("bool") 
-    vp_is_goal  = g.new_vertex_property("bool")
-    # Propietats de les arestes: el mateix que amb els nodes
-    ep_piece     = g.new_edge_property("int")
-    ep_direction = g.new_edge_property("string")
-    ep_distance  = g.new_edge_property("int")
-    # Propietat global: JSON del puzzle (necessari per 3D_view.py)
-    gp_puzzle = g.new_graph_property("string")
-    gp_puzzle[g] = puzzle.to_json() #a aquesta ja li assignem un valor
-    
-    g.graph_properties["puzzle"] = gp_puzzle
+    # Creem i registrem les propietats per utilitzar-les després a 3D_view.py, solve.py i eval.py
+    g.vp.state = g.new_vertex_property("object") 
+    g.vp.is_start = g.new_vertex_property("bool") 
+    g.vp.is_goal = g.new_vertex_property("bool")
+    g.ep.piece = g.new_edge_property("int")
+    g.ep.direction = g.new_edge_property("string")
+    g.ep.distance = g.new_edge_property("int")
+    g.gp.puzzle = g.new_graph_property("string")
+    g.gp.puzzle[g] = puzzle.to_json()
 
     key_to_v: dict[StateKey, Vertex] = {}
 
@@ -100,18 +95,17 @@ def build_graph(puzzle: Puzzle) -> Graph:
         if k not in key_to_v:
             v = g.add_vertex()
             key_to_v[k] = v
-            vp_state[v]    = state
-            vp_is_start[v] = False
-            vp_is_goal[v]  = is_goal(puzzle, state)
+            g.vp.state[v] = state
+            g.vp.is_start[v] = False
+            g.vp.is_goal[v] = is_goal(puzzle, state)
         return key_to_v[k]
 
     # BFS des de l'estat inicial: l'hem de construir per poder-lo recórrer després amb les funcions pròpies de graph_tool
     start_v = get_or_create(puzzle.start)
-    vp_is_start[start_v] = True
+    g.vp.is_start[start_v] = True
 
     queue: deque[State] = deque([puzzle.start])
     visited: set[StateKey] = {state_key(puzzle, puzzle.start)}
-    added_edges: set[tuple[StateKey, StateKey]] = set()
 
     t_inici = time.monotonic()  # Instant d'inici del BFS
 
@@ -124,37 +118,23 @@ def build_graph(puzzle: Puzzle) -> Graph:
         # Si ha passat massa temps, s'atura el programa i ens diu que el puzzle té molts estats
         # Per desactivar el límit, s'ha de posar TIMEOUT_ACTIVAT = False al principi d'aquest fitxer
         if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
-            raise TimeoutError(
-                f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. "
-                f"El puzzle té molts estats (ja s'han processat {g.num_vertices():,} estats (nodes)). "
-            )
+            raise TimeoutError( f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. \nEl puzzle té molts estats (ja s'han processat {g.num_vertices():,} estats (nodes)). ")
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
             next_state = apply_move(puzzle, current, (piece_idx, direction, dist))
             next_key   = state_key(puzzle, next_state)
-
             next_v = get_or_create(next_state)
 
-            edge_key = tuple(sorted((current_key, next_key)))
-            if edge_key not in added_edges:
-                added_edges.add(edge_key)
+            # Com que el graf no és dirigit hem de vigilar de no posar una aresta endavant i un altre cop endarrere
+            if g.edge(current_v, next_v) is None:
                 e = g.add_edge(current_v, next_v)
-                ep_piece[e]     = piece_idx
-                ep_direction[e] = direction
-                ep_distance[e]  = dist
+                g.ep.piece[e] = piece_idx
+                g.ep.direction[e] = direction
+                g.ep.distance[e] = dist
 
             if next_key not in visited:
                 visited.add(next_key)
                 queue.append(next_state)
-
-    # Registrar propietats al graf: Assignar valors
-    g.vertex_properties["state"]    = vp_state
-    g.vertex_properties["is_start"] = vp_is_start
-    g.vertex_properties["is_goal"]  = vp_is_goal
-    g.edge_properties["piece"]      = ep_piece
-    g.edge_properties["direction"]  = ep_direction
-    g.edge_properties["distance"]   = ep_distance
-
     return g
 
 
@@ -173,20 +153,19 @@ def main() -> None:
     puzzle = Puzzle.from_json(json_path.read_text())
     output_path = json_path.with_suffix(".graphml")
     
+    # Si el graf ja existeix aturem el programa perquè no cal tornar-lo a construir.
     if output_path.exists():
         print("El graf ja existeix.")
         return
 
-    print(f"Construint el graf per: {json_path}")
-    try:
+    try: # Construir el graf i gestionar l'error de temps
         g = build_graph(puzzle)
     except TimeoutError as e:
-        print(f"\n⏱️  {e}")
-        sys.exit(1)
+        print(f"\n Error de temps: {e}")
+        sys.exit(1) #sortida amb error
+    
     print_summary(puzzle, g)
-
     g.save(str(output_path))
-    print(f"Graf guardat a: {output_path}")
 
 
 if __name__ == "__main__":
