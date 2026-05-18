@@ -96,3 +96,24 @@ Genera la distribució estadística de cada mètrica (percentils) i la desa a ca
 Avalua la duresa dels llindars actuals i et proposa nous valors calibrats per copiar directament a eval.py.
 Calcula la puntuació recalibrada de cada puzzle vàlid i la desa juntament amb el seu ID a ratings.json.
 Finalment, connecta amb rate.py per permetre pujar totes les valoracions vàlides de cop al servidor.
+
+
+
+
+PSEUDODIAMETRE
+l motiu és 100% per rendiment i velocitat extrema. Calcular el diàmetre real i exacte d'un graf és computacionalment caríssim en comparació amb el pseudo-diàmetre.
+T'explico la diferència:
+1. Què és el Diàmetre Real?
+El diàmetre és el camí mínim més llarg possible entre qualsevol parella de nodes del graf.
+Per calcular-lo exactament, l'algorisme ha de calcular el camí més curt des de tots els nodes cap a tots els altres nodes (All-Pairs Shortest Path).
+Si tens un graf amb 50.000 nodes (com el puzzle 29), l'ordinador hauria de llançar un BFS 50.000 vegades (una vegada començant des de cadascun dels nodes del graf).
+Això trigaria diversos minuts o hores a resoldre's per a cada puzzle gran. El teu programa d'avaluació es quedaria completament congelat!
+2. Què és el Pseudo-diàmetre?
+És una aproximació heurística súper intel·ligent que sol trobar exactament el mateix valor (o un valor extremadament proper, amb un error de com a molt 1 o 2 moviments) de forma pràcticament instantània.
+Com ho fa?
+Tria un node a l'atzar $u$.
+Llança un sol BFS des de $u$ per trobar el node més llunyà possible, que anomenarem $v$.
+Després, llança un segon BFS des de $v$ per trobar el node més llunyà possible, que anomenarem $w$.
+La distància entre $v$ i $w$ és el pseudo-diàmetre! (De vegades repeteix aquest procés 2 o 3 vegades més per assegurar-se).
+El gran avantatge:
+En lloc de fer 50.000 BFS, el pseudo-diàmetre només en fa 2 o 3 en total. Això fa que trigui mil·lisegons (0.01 segons) en lloc d'hores! Per al Klotski, on els grafs d'estats poden créixer moltíssim, utilitzar el diàmetre real seria inviable, mentre que el pseudo-diàmetre és instantani i perfecte.

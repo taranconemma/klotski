@@ -8,11 +8,15 @@ creo que el graph se necesta para evaluar para el solve basta con un astar
 Tema del timeout????
 mirar si se esta aprovechando bien todas las cosas del graph.tools -> RESOLT (s'ha optimitzat solve.py usant shortest_path natiu en C++ de graph-tool)
 ejemplos para justificar el eval
+cambia los m4 por m3 
+en las funciones del eval las especificaciones deben mencionar los parametros
 mirar todos los sitios donde deberia ir un type alias
 el graf solo tiene nnodos a los que se puede llegar, por tanto en el solve deberia tener en cuenta nodos con distancias infinitas?
 como que graph tools es mas rapido con el shortest_path solo porque esta implementado en C++ y es 30 veces mas rapido calcular todas las distancias que hacer un bfs de toda la vida
 el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
 lo de las properties del graph.py para que sirve y esta bien o se tiene que hacer a mano??
+
+El graph tools deberia ser solo los algorimos para el eval y en el solve hacerlo a mano?? asi ponemos bfs para el solve y dfs para el graf
 
 Esto de los estados repetidos con piezas teoricamente identicas hace que el sample1 pase por ejemplo de tener 35976 nodos a tener 2998
 

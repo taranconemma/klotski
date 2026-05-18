@@ -167,6 +167,5 @@ def main() -> None:
     print_summary(puzzle, g)
     g.save(str(output_path))
 
-
 if __name__ == "__main__":
     main()

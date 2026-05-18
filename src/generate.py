@@ -207,7 +207,7 @@ def avalua_puzzle(puzzle_dict):
         return 0.0, {}
 
     # Calculem la puntuació
-    puntuacio, detalls = puntua_puzzle(puzzle_obj, graf, node_inici, nodes_objectiu)
+    puntuacio, detalls = puntua_puzzle(graf, node_inici, nodes_objectiu)
     return puntuacio, detalls
 
 

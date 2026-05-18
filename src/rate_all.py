@@ -35,7 +35,6 @@ from puzzle import Puzzle
 LLINDAR_ESTATS    = 10_000   # log(n) / log(LLINDAR) → 1.0
 LLINDAR_SOLUCIO   = 30       # passos → 1.0
 LLINDAR_DIAMETRE  = 50       # diametre → 1.0
-# La mesura de components connexes no té llindar (és fraccio_gran directament)
 
 
 # -------------------------------------------------------------------------
@@ -67,7 +66,6 @@ def extraure_metriques_brutes(g: gt.Graph) -> dict:
         - num_arestes: nombre d'arestes
         - moviments_solucio: longitud del camí mínim fins a un node goal
         - diametre: pseudo-diàmetre del graf
-        - fraccio_component_gran: fracció de nodes a la component connexa més gran
         - fraccio_atzucacs: fracció de nodes des dels quals NO es pot arribar a cap goal
         - grau_mitja: nombre mitjà d'arestes per node
     """
@@ -80,21 +78,13 @@ def extraure_metriques_brutes(g: gt.Graph) -> dict:
     num_goals    = len(nodes_goal)
 
     # Longitud de la solució òptima (BFS des de l'inici)
-    dist_from_start = shortest_distance(g, source=node_inici)
     moviments_solucio = 0
     if nodes_goal:
-        moviments_solucio = min(
-            int(dist_from_start[v]) for v in nodes_goal
-            if int(dist_from_start[v]) < 2**30
-        )
+        distancies = shortest_distance(g, source=node_inici)
+        moviments_solucio = min(int(distancies[v]) for v in nodes_goal)
 
     # Diàmetre
     diametre, _ = pseudo_diameter(g) if num_nodes >= 2 else (0, None)
-
-    # Component connexa dominant
-    _, histograma = label_components(g)
-    component_gran   = max(histograma) if histograma else 0
-    fraccio_component_gran = component_gran / num_nodes if num_nodes > 0 else 0.0
 
     # Atzucacs: nodes des dels quals no es pot arribar a cap goal
     # Fem un BFS invers: des de tots els goals cap enrere
@@ -122,7 +112,6 @@ def extraure_metriques_brutes(g: gt.Graph) -> dict:
         "num_goals":             num_goals,
         "moviments_solucio":     moviments_solucio,
         "diametre":              int(diametre),
-        "fraccio_component_gran": round(fraccio_component_gran, 4),
         "fraccio_atzucacs":      round(fraccio_atzucacs, 4),
         "grau_mitja":            round(grau_mitja, 4),
         "eficiencia_cami":       round(moviments_solucio / diametre, 4) if diametre > 0 else 0.0,
@@ -173,16 +162,14 @@ def puntua_amb_llindars(metriques: dict, llindar_estats: float,
     dist = metriques["moviments_solucio"]
     m2 = min(dist / llindar_solucio, 1.0) if llindar_solucio > 0 else 0.0
 
-    m3 = metriques["fraccio_component_gran"]
-
     d = metriques["diametre"]
-    m4 = min(d / llindar_diametre, 1.0) if llindar_diametre > 0 else 0.0
+    m3 = min(d / llindar_diametre, 1.0) if llindar_diametre > 0 else 0.0
 
     # Eficiència del camí: moviments_solucio / diametre (sense llindar extern, ja és 0–1)
-    m5 = metriques.get("eficiencia_cami", 0.0)
+    m4 = metriques.get("eficiencia_cami", 0.0)
 
-    # Mateixos pesos que eval.py: 20 + 35 + 15 + 15 + 15 = 100%
-    puntuacio_0_1 = 0.20 * m1 + 0.35 * m2 + 0.15 * m3 + 0.15 * m4 + 0.15 * m5
+    # Mateixos pesos que eval.py: 25% + 45% + 15% + 15% = 100%
+    puntuacio_0_1 = 0.25 * m1 + 0.45 * m2 + 0.15 * m3 + 0.15 * m4
     return round(puntuacio_0_1 * 5.0, 3)
 
 
@@ -305,9 +292,9 @@ def imprime_bloc_codi(nous_llindars: dict, n_puzzles: int) -> None:
     print("─" * 70)
     print()
     print(f"    # --- Calibració automàtica {avui} ({n_puzzles} puzzles) ---")
-    print(f"    max_esperat = {nous_llindars['llindar_estats']:,}   # mesura_nombre_estats()")
-    print(f"    max_esperat = {nous_llindars['llindar_solucio']}   # mesura_longitud_solucio()")
-    print(f"    max_esperat = {nous_llindars['llindar_diametre']}   # mesura_diametre()")
+    print(f"    MAX_ESTATS:   int = {nous_llindars['llindar_estats']}   # nodes")
+    print(f"    MAX_SOLUCIO:  int = {nous_llindars['llindar_solucio']}   # moviments")
+    print(f"    MAX_DIAMETRE: int = {nous_llindars['llindar_diametre']}   # pseudo-diàmetre")
     print()
     print("═" * 70)
 
