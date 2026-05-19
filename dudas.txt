@@ -6,7 +6,7 @@ como que graph tools es mas rapido con el shortest_path solo porque esta impleme
 El graph tools deberia ser solo los algorimos para el eval y en el solve hacerlo a mano?? asi ponemos bfs para el solve y dfs para el graf
 Porque en el readme pone dfs??
 El dfs es peor porque puede dar recursion error??
-guardar de alguna forma que el graph no se puede generar para no intentarlo cada vez que vuelv o a hacer rate all si tarda mas de 5 minuts
+guardar de alguna forma que el graph no se puede generar para no intentarlo cada vez que vuelv o a hacer rate all si tarda mas de 5 minuts pero deberia ir en el graph no el rate all
 
 EVAL:
 preguntar que criterios han usado para el eval???
