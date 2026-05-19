@@ -23,6 +23,7 @@ Mesures implementades:
 
 import math
 import sys
+import time
 from numpy import full, where, minimum, inf
 from pathlib import Path
 
@@ -40,6 +41,9 @@ from puzzle import Puzzle, State
 # altes ni molt baixes)
 # Executant rate_all.py es pot obtenir una proposta de nous valors en funció de 
 # última avaluació dels puzzles del repositori comú. 
+
+TIMEOUT_EVAL_ACTIVAT: bool = True
+TIMEOUT_EVAL_SEGONS: int   = 5 * 60  # 5 minuts
 
 MAX_ESTATS:    int   = 10_000  # nodes
 MAX_SOLUCIO:   int   = 30      # moviments fins a la solució més curta
@@ -258,6 +262,8 @@ def puntua_puzzle(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objecti
 
     Retorna una puntuació de 0 a 5 i un diccionari amb les puntuacions de cada mesura.
     """
+    t_inici_eval = time.monotonic()
+
     # Calculem les distàncies des de l'inici per reutilitzar-les
     dist_inici = shortest_distance(graf, source=node_inici)
 
@@ -265,14 +271,48 @@ def puntua_puzzle(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objecti
     if not nodes_objectiu:
         return 0.0, {k: 0.0 for k in ["estats", "solucio", "diametre", "eficiencia", "paranys", "ponts", "engany", "abisme"]}
 
-    m1 = mesura_nombre_estats(graf)
-    m2 = mesura_longitud_solucio(dist_inici, nodes_objectiu)
-    m3 = mesura_diametre(graf)
-    m4 = mesura_eficiencia_cami(graf, dist_inici, nodes_objectiu)
-    m5 = mesura_densitat_paranys(graf)
-    m6 = mesura_ponts_critics(graf, node_inici, nodes_objectiu, dist_inici)
-    m7 = mesura_engany_gradient(graf, puzzle, node_inici, nodes_objectiu, dist_inici)
-    m8 = mesura_labisme(graf, node_inici, nodes_objectiu, dist_inici)
+    # Variable per saber quina mètrica s'està executant en cada moment
+    metrica_actual = "Inicialització"
+
+    def check_timeout():
+        if TIMEOUT_EVAL_ACTIVAT and (time.monotonic() - t_inici_eval) > TIMEOUT_EVAL_SEGONS:
+            raise TimeoutError(f"L'avaluació de mètriques ha superat el límit de temps de 5 minuts a la mètrica: {metrica_actual}.")
+
+    try:
+        check_timeout()
+        metrica_actual = "Nombre d'estats"
+        m1 = mesura_nombre_estats(graf)
+        
+        check_timeout()
+        metrica_actual = "Longitud solució"
+        m2 = mesura_longitud_solucio(dist_inici, nodes_objectiu)
+        
+        check_timeout()
+        metrica_actual = "Diàmetre"
+        m3 = mesura_diametre(graf)
+        
+        check_timeout()
+        metrica_actual = "Eficiència camí"
+        m4 = mesura_eficiencia_cami(graf, dist_inici, nodes_objectiu)
+        
+        check_timeout()
+        metrica_actual = "Densitat de paranys"
+        m5 = mesura_densitat_paranys(graf)
+        
+        check_timeout()
+        metrica_actual = "Ponts crítics"
+        m6 = mesura_ponts_critics(graf, node_inici, nodes_objectiu, dist_inici)
+        
+        check_timeout()
+        metrica_actual = "Engany del gradient"
+        m7 = mesura_engany_gradient(graf, puzzle, node_inici, nodes_objectiu, dist_inici)
+        
+        check_timeout()
+        metrica_actual = "L'abisme"
+        m8 = mesura_labisme(graf, node_inici, nodes_objectiu, dist_inici)
+    except TimeoutError as e:
+        print(f"\n⏱️  {e} S'assigna 0 a tot.")
+        m1 = m2 = m3 = m4 = m5 = m6 = m7 = m8 = 0.0
 
     puntuacio_0_1 = 0.10*m1 + 0.25*m2 + 0.10*m3 + 0.10*m4 + 0.10*m5 + 0.10*m6 + 0.15*m7 + 0.10*m8
     puntuacio_final = puntuacio_0_1 * 5.0
@@ -300,7 +340,7 @@ def main(fitxer: str) -> float:
         graf = load_graph(str(graphml_path))
     else:
         print("Construint el graf...")
-        graf = build_graph(puzzle)
+            graf = build_graph(puzzle)
 
     node_inici     = next(v for v in graf.vertices() if graf.vp["is_start"][v])
     nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]
