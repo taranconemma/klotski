@@ -25,13 +25,10 @@ from pathlib import Path
 
 from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, Vertex, load_graph #type:ignore
 
-from src.graph_dfs import build_graph, TIMEOUT_SEGONS
+from graph_dfs import build_graph, TIMEOUT_SEGONS
 from puzzle import Puzzle, State
 
-
-# ─────────────────────────────────────────────────────────────────────────────
 # LLINDARS ACTUALS D'EVAL.PY (hard-coded aquí per poder comparar-los)
-# ─────────────────────────────────────────────────────────────────────────────
 
 LLINDAR_ESTATS:   int   = 10_000
 LLINDAR_SOLUCIO:  int   = 30
@@ -205,7 +202,7 @@ def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
             for idx_cami, v in enumerate(nodes_cami[:-1]):
                 for vei in v.out_neighbors():
                     if vei not in nodes_cami_set:
-                        dist_vei_a_cami = shortest_distance(g, source=vei, target=nodes_cami[idx_cami + 1:]).min()
+                        dist_vei_a_cami = shortest_distance(g, source=vei, target=nodes_cami[idx_cami + 1:], max_dist=40).min()
                         cost_abisme = max(cost_abisme, 1 + dist_vei_a_cami)
 
     return {
@@ -462,6 +459,15 @@ def main() -> None:
         "abisme":   LLINDAR_ABISME,
     }
 
+    ratings_path = Path("puzzles/downloads/ratings.json")
+    cache_ratings = {}
+    if ratings_path.exists():
+        try:
+            with open(ratings_path) as f:
+                cache_ratings = json.load(f)
+        except Exception:
+            pass
+
     totes_metriques: list[dict] = []
     resultats_per_puzzle: dict  = {}
     errors: list[str]           = []
@@ -471,6 +477,19 @@ def main() -> None:
         if not fitxer.exists():
             print(f"  ⚠️  {clau_curta}: fitxer no trobat, ometent.")
             errors.append(clau_curta)
+            continue
+
+        # Comprovem si ja tenim les mètriques calculades a la caché de ratings.json
+        if clau_curta in cache_ratings and "metriques" in cache_ratings[clau_curta]:
+            metriques = cache_ratings[clau_curta]["metriques"]
+            print(f"  [{clau_curta}] Carregant de la caché... (nodes={metriques['num_nodes']:,} sol={metriques['moviments_solucio']})")
+            totes_metriques.append(metriques)
+            puntuacio_original = puntua_amb_llindars(metriques, llindars_actuals)
+            resultats_per_puzzle[clau_curta] = {
+                "id_real":            id_real,
+                "metriques":          metriques,
+                "puntuacio_original": puntuacio_original,
+            }
             continue
 
         print(f"  [{clau_curta}] Processant...", end=" ", flush=True)

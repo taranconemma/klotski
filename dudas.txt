@@ -15,6 +15,7 @@ cambiar los nomrbes suenan muy chat
 como funciona la distacnia de manhattan
 ns que betweenness y clostness y klustering
 quitar el type ignore?
+averiguar si tarda mucho y hay que cambiarlo
 
 
 
@@ -22,6 +23,7 @@ OTROS:
 Tema del timeout????
 el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
 hay que hacer tests???
+hacer que el rate all añada lo que ha tardado en hacer el graph y evaluarlo en tiempo, las dos cosas por separado
 
 
 COSAS PENDIENTES:
@@ -29,6 +31,44 @@ mirar todos los sitios donde deberia ir un type alias
 tests
 poner asserts 
 revisar los prints
+
+QUe es esto que he cambiado del solve??? hace ahora un algortimo raro???
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+^CTraceback (most recent call last):
+  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 546, in <module>
+  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 481, in main
+    errors.append(clau_curta)
+                ~^^^^^^^^^^^^
+  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 159, in extraure_metriques_brutes
+    # Obtenim els graus de tots els vèrtexs
+  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/.pixi/envs/default/lib/python3.13/site-packages/graph_tool/topology/__init__.py", line 2108, in shortest_distance
+    libgraph_tool_topology.get_dists(u._Graph__graph,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+                                     int(u.vertex(int(source))),
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                                     negative_weights, reached, dag,
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                     get_pred, return_reached)
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+make: *** [rate_all] Error 130
+
 
 
 

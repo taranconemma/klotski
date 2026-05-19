@@ -1,4 +1,4 @@
-p = 57
+p = 16
 
 m = "comentari"
 score = auto

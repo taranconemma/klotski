@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-from graph_tool.all import Graph, Vertex, find_vertex, shortest_distance, shortest_path, load_graph
+from graph_tool.all import Graph, Vertex, find_vertex, shortest_distance, shortest_path, load_graph #type:ignore
 
 
 def solve(g: Graph) -> list[tuple[int, str, int]] | None:
@@ -37,8 +37,25 @@ def solve(g: Graph) -> list[tuple[int, str, int]] | None:
     best_goal = min(goals, key=lambda v: dist[v])
 
     # Reconstruïm el camí i retornem els moviments en el format adient
-    _, path_edges = shortest_path(g, start_v, best_goal)
-    return [(int(g.ep["piece"][e]), str(g.ep["direction"][e]), int(g.ep["distance"][e])) for e in path_edges]
+    path_vertices, path_edges = shortest_path(g, start_v, best_goal)
+    
+    moves = []
+    opposite_dir = {"N": "S", "S": "N", "E": "W", "W": "E"}
+    
+    for i, e in enumerate(path_edges):
+        u = path_vertices[i]
+        piece = int(g.ep["piece"][e])
+        direction = str(g.ep["direction"][e])
+        distance = int(g.ep["distance"][e])
+        
+        # Si estem recorrent l'aresta a l'inrevés (del destí a l'origen original),
+        # invertim la direcció del moviment.
+        if u != e.source():
+            direction = opposite_dir[direction]
+            
+        moves.append((piece, direction, distance))
+        
+    return moves
 
 
 

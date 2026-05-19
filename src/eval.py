@@ -231,7 +231,7 @@ def mesura_labisme(graf: Graph, node_inici: Vertex, nodes_objectiu: list[Vertex]
             if vei not in nodes_cami_set:
                 # Cost de sortir al veí (1 moviment) i tornar al camí més proper
                 # (des del punt actual fins al final, no des de l'inici)
-                dist_vei_a_cami = shortest_distance(graf, source=vei, target=nodes_cami[idx_cami + 1:]).min()
+                dist_vei_a_cami = shortest_distance(graf, source=vei, target=nodes_cami[idx_cami + 1:], max_dist=MAX_ABISME).min()
                 pitjor_cost = max(pitjor_cost, 1 + dist_vei_a_cami)
 
     return min(pitjor_cost / MAX_ABISME, 1.0)
