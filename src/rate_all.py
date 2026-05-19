@@ -23,11 +23,12 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, load_graph #type:ignore
+from eval import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY
+from graph_tool.all import Graph, load_graph #type:ignore
 
 from graph import build_graph
 from puzzle import Puzzle
-from eval import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY, MAX_ABISME, heuristica_manhattan, nodes_cami_optim
+from eval import puntua_puzzle
 
 
 def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
@@ -42,161 +43,27 @@ def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
     return g
 
 
-
 def extraure_valors_concrets(g: Graph, puzzle: Puzzle) -> dict:
-    """Extreu tots els valors concrets reals d'un graf (sense normalitzar).
-
-    Retorna un diccionari amb:
-        Clàssiques:
-            num_nodes, num_arestes, num_goals
-            moviments_solucio, diametre, eficiencia_cami
-            fraccio_atzucacs, grau_mitja
-        Originals:
-            paranys_ponderat  — densitat de culs-de-sac propers a la meta
-            ponts_al_cami     — nombre de ponts en el camí òptim
-            engany_gradient   — màxim allunyament heurístic en el camí òptim
-            cost_abisme       — pitjor cost de recuperació d'un error al camí
+    """Delega en puntua_puzzle d'eval.py per obtenir els valors bruts reals.
+    Si el graf és buit (timeout o límit de nodes), retorna zeros.
     """
-    num_nodes   = g.num_vertices()
-    num_arestes = g.num_edges()
+    num_nodes = g.num_vertices()
+    zeros = {"num_nodes": num_nodes, "num_arestes": g.num_edges(), "num_goals": 0,
+             "moviments_solucio": 0, "diametre": 0,
+             "grau_mitja": 0.0, "eficiencia_cami": 0.0, "paranys_ponderat": 0.0,
+             "ponts_al_cami": 0, "engany_gradient": 0}
 
-    # Si està buit (per timeout) o té més de 400.000 nodes, assignem 0 a tot per evitar bloquejos
-    if num_nodes == 0 or num_nodes > 400_000:
-        return {
-            "num_nodes":          num_nodes,
-            "num_arestes":        num_arestes,
-            "num_goals":          0,
-            "moviments_solucio":  0,
-            "diametre":           0,
-            "fraccio_atzucacs":   0.0,
-            "grau_mitja":         0.0,
-            "eficiencia_cami":    0.0,
-            "paranys_ponderat":   0.0,
-            "ponts_al_cami":      0,
-            "engany_gradient":    0,
-            "cost_abisme":        0,
-        }
+    if num_nodes == 0 or num_nodes > 600_000: return zeros
 
-    node_inici    = next(v for v in g.vertices() if g.vp["is_start"][v])
+    node_inici     = next(v for v in g.vertices() if g.vp["is_start"][v])
     nodes_objectiu = [v for v in g.vertices() if g.vp["is_goal"][v]]
-    num_goals     = len(nodes_objectiu)
 
-    if not nodes_objectiu:
-        return {
-            # Clàssiques
-            "num_nodes":          num_nodes,
-            "num_arestes":        num_arestes,
-            "num_goals":          0,
-            "moviments_solucio":  0,
-            "diametre":           0,
-            "fraccio_atzucacs":   0.0,
-            "grau_mitja":         0.0,
-            "eficiencia_cami":    0.0,
-            # Originals
-            "paranys_ponderat":   0.0,
-            "ponts_al_cami":      0,
-            "engany_gradient":    0,
-            "cost_abisme":        0,
-        }
+    _, _, valors_bruts = puntua_puzzle(g, puzzle, node_inici, nodes_objectiu)
 
-    # ── Mètriques clàssiques ──────────────────────────────────────────────
+    if not valors_bruts:
+        return zeros
 
-    dist_inici = shortest_distance(g, source=node_inici)
-
-    moviments_solucio = min(int(dist_inici[v]) for v in nodes_objectiu)
-
-    diametre = 0
-    if num_nodes >= 2:
-        diametre, _ = pseudo_diameter(g)
-
-    eficiencia_cami = round(moviments_solucio / diametre, 4) if diametre > 0 else 0.0
-
-    etiquetes, _ = label_components(g)
-    components_amb_goal: set[int] = {int(etiquetes[v]) for v in nodes_objectiu}
-    atzucacs = sum(1 for v in g.vertices() if int(etiquetes[v]) not in components_amb_goal)
-    fraccio_atzucacs = round(atzucacs / num_nodes, 4) if num_nodes > 0 else 0.0
-    grau_mitja = round((2 * num_arestes) / num_nodes, 4) if num_nodes > 0 else 0.0
-
-    # ── Mètrica 5: Densitat de paranys ───────────────────────────────────
-    # Cada cul-de-sac es pondera per la seva proximitat al goal més proper.
-
-    import numpy as np
-
-    # Obtenim els índexs dels nodes objectiu directament des del graf
-    goal_indices = np.where(g.vp["is_goal"].a)[0]
-    
-    # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
-    dists_min = np.full(num_nodes, np.inf)
-    if len(goal_indices) > 0:
-        for goal_idx in goal_indices:
-            dg = shortest_distance(g, source=goal_idx)
-            dists_min = np.minimum(dists_min, dg.a)
-
-    # Obtenim els graus de tots els vèrtexs
-    graus = g.get_out_degrees(g.get_vertices())
-    
-    # Filtrem només els culs-de-sac (grau 1)
-    paranys = (graus == 1)
-    
-    # Calculem la suma dels pesos de forma vectoritzada
-    suma_paranys = float(np.sum(1.0 / (1.0 + dists_min[paranys])))
-    paranys_ponderat = round(suma_paranys / num_nodes, 6) if num_nodes > 0 else 0.0
-
-    # ── Mètrica 6: Ponts crítics en el camí òptim ────────────────────────
-    # Identifiquem ponts via components biconnectades.
-
-    ponts_al_cami = 0
-    if nodes_objectiu and num_nodes >= 2:
-        from collections import Counter
-        comp_aresta, _, _ = label_biconnected_components(g)
-        counts = Counter(comp_aresta.a)
-
-        best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
-        _, path_edges = shortest_path(g, node_inici, best_goal)
-        ponts_al_cami = sum(1 for e in path_edges if counts[comp_aresta[e]] == 1)
-
-    # ── Mètrica 7: Engany del gradient ───────────────────────────────────
-    # Màxim allunyament de la heurística de Manhattan al llarg del camí òptim.
-
-    engany_gradient = 0
-    if nodes_objectiu and g.vp.get("state"):
-        nodes_cami = nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
-        if nodes_cami:
-            h_inicial = heuristica_manhattan(puzzle, g.vp["state"][node_inici])
-            h_max = max(heuristica_manhattan(puzzle, g.vp["state"][v]) for v in nodes_cami if g.vp["state"][v] is not None)
-            engany_gradient = h_max - h_inicial
-
-    # ── Mètrica 8: L'abisme ──────────────────────────────────────────────
-    # Pitjor cost (anar + tornar) de fer un pas en fals en el camí òptim.
-
-    cost_abisme = 0
-    if nodes_objectiu and num_nodes >= 3:
-        nodes_cami = nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
-        if len(nodes_cami) >= 3:
-            nodes_cami_set = set(nodes_cami)
-
-            for idx_cami, v in enumerate(nodes_cami[:-1]):
-                for vei in v.out_neighbors():
-                    if vei not in nodes_cami_set:
-                        dist_vei_a_cami = shortest_distance(g, source=vei, target=nodes_cami[idx_cami + 1:], max_dist=40).min()
-                        cost_abisme = max(cost_abisme, 1 + dist_vei_a_cami)
-
-    return {
-        # Clàssiques
-        "num_nodes":          num_nodes,
-        "num_arestes":        num_arestes,
-        "num_goals":          num_goals,
-        "moviments_solucio":  moviments_solucio,
-        "diametre":           int(diametre),
-        "fraccio_atzucacs":   fraccio_atzucacs,
-        "grau_mitja":         grau_mitja,
-        "eficiencia_cami":    eficiencia_cami,
-        # Originals
-        "paranys_ponderat":   paranys_ponderat,
-        "ponts_al_cami":      ponts_al_cami,
-        "engany_gradient":    engany_gradient,
-        "cost_abisme":        cost_abisme,
-    }
+    return valors_bruts
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -249,17 +116,15 @@ def puntua_amb_llindars(metriques: dict, llindars: dict) -> float:
     m5 = normalitza_lin(metriques["paranys_ponderat"],  llindars["paranys"])
     m6 = normalitza_lin(metriques["ponts_al_cami"],     llindars["ponts"])
     m7 = normalitza_lin(metriques["engany_gradient"],   llindars["engany"])
-    m8 = normalitza_lin(metriques["cost_abisme"],       llindars["abisme"])
 
     puntuacio_0_1 = (
         0.10 * m1 +
-        0.25 * m2 +
+        0.30 * m2 +
         0.10 * m3 +
         0.10 * m4 +
         0.10 * m5 +
         0.10 * m6 +
-        0.15 * m7 +
-        0.10 * m8
+        0.20 * m7
     )
     return round(puntuacio_0_1 * 5.0, 3)
 
@@ -278,7 +143,6 @@ def analitzar_calibracio(totes_metriques: list[dict]) -> dict:
         "paranys":  "paranys_ponderat",
         "ponts":    "ponts_al_cami",
         "engany":   "engany_gradient",
-        "abisme":   "cost_abisme",
     }
     llindars_actuals = {
         "estats":   MAX_ESTATS,
@@ -287,7 +151,6 @@ def analitzar_calibracio(totes_metriques: list[dict]) -> dict:
         "paranys":  MAX_PARANYS,
         "ponts":    MAX_PONTS,
         "engany":   MAX_ENGANY,
-        "abisme":   MAX_ABISME,
     }
 
     estadistics: dict[str, dict] = {}
@@ -343,7 +206,6 @@ def imprime_taula_calibracio(calibracio: dict) -> None:
         ("paranys",  "Densitat paranys"),
         ("ponts",    "Ponts crítics"),
         ("engany",   "Engany gradient"),
-        ("abisme",   "L'abisme"),
     ]
 
     print()
@@ -403,7 +265,6 @@ def imprime_bloc_codi(nous_llindars: dict, n_puzzles: int) -> None:
     print(f"    MAX_PARANYS:  float = {nl['paranys']}   # densitat paranys ponderada")
     print(f"    MAX_PONTS:    int   = {int(nl['ponts'])}   # ponts en el camí òptim")
     print(f"    MAX_ENGANY:   int   = {int(nl['engany'])}   # caselles d'allunyament màxim")
-    print(f"    MAX_ABISME:   int   = {int(nl['abisme'])}   # cost màxim de recuperació")
     print()
     print("═" * 78)
 
@@ -415,7 +276,7 @@ def imprime_bloc_codi(nous_llindars: dict, n_puzzles: int) -> None:
 def main() -> None:
     index_path = Path("puzzles/index.json")
     if not index_path.exists():
-        print("❌ No s'ha trobat puzzles/index.json. Executa primer 'make descarrega'.")
+        print("No s'ha trobat puzzles/index.json. Executa primer 'make descarrega'.")
         sys.exit(1)
 
     with open(index_path) as f:
@@ -432,7 +293,6 @@ def main() -> None:
         "paranys":  MAX_PARANYS,
         "ponts":    MAX_PONTS,
         "engany":   MAX_ENGANY,
-        "abisme":   MAX_ABISME,
     }
 
     ratings_path = Path("puzzles/downloads/ratings.json")
@@ -502,7 +362,6 @@ def main() -> None:
             f"paranys={metriques['paranys_ponderat']:.4f}  "
             f"ponts={metriques['ponts_al_cami']}  "
             f"engany={metriques['engany_gradient']}  "
-            f"abisme={metriques['cost_abisme']}  "
             f"→ {puntuacio_original:.2f}★"
         )
 

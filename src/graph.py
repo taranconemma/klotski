@@ -114,11 +114,14 @@ def build_graph(puzzle: Puzzle) -> Graph:
         current_key = state_key(puzzle, current)
         current_v = key_to_v[current_key]
 
-        # Comprovació de timeout (cada node processat)
-        # Si ha passat massa temps, s'atura el programa i ens diu que el puzzle té molts estats
-        # Per desactivar el límit, s'ha de posar TIMEOUT_ACTIVAT = False al principi d'aquest fitxer
+        # Comprovació de timeout i límit de nodes
+        # Si ha passat massa temps o el graf és massa gran, aturem i retornem buit
         if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
-            print(f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. Retorna graf buit.")
+            print(f"\nError de temps: El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. Retorna graf buit.")
+            return Graph()
+            
+        if g.num_vertices() > 600_000:
+            print(f"\nError de nodes: El graf ha superat el límit de 600.000 nodes ({g.num_vertices():,}). Retorna graf buit.")
             return Graph()
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):

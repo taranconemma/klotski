@@ -22,6 +22,8 @@ como funciona la distacnia de manhattan
 ns que betweenness y clostness y klustering
 quitar el type ignore?
 averiguar si tarda mucho y hay que cambiarlo
+el mesura atzucacs???
+quizas juntar algunas funciones del eval haria que fueran mas raapido??a
 
 
 
