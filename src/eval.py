@@ -23,7 +23,6 @@ Mesures implementades:
 
 import math
 import sys
-import time
 from numpy import full, where, minimum, inf
 from pathlib import Path
 
@@ -41,9 +40,6 @@ from puzzle import Puzzle, State
 # altes ni molt baixes)
 # Executant rate_all.py es pot obtenir una proposta de nous valors en funció de 
 # última avaluació dels puzzles del repositori comú. 
-
-TIMEOUT_EVAL_ACTIVAT: bool = True
-TIMEOUT_EVAL_SEGONS: int   = 5 * 60  # 5 minuts
 
 MAX_ESTATS:    int   = 10_000  # nodes
 MAX_SOLUCIO:   int   = 30      # moviments fins a la solució més curta
@@ -168,7 +164,7 @@ def mesura_ponts_critics( graf: Graph, node_inici: Vertex, nodes_objectiu: list[
     return min(ponts_al_cami / MAX_PONTS, 1.0)
 
 
-def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
+def heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
     """Suma de distàncies de Manhattan de cada peça a la meta."""
     total = 0
     for i, pos_meta in puzzle.goals:
@@ -176,6 +172,12 @@ def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
         mx, my = pos_meta
         total += abs(px - mx) + abs(py - my)
     return total
+
+def nodes_cami_optim(g: Graph, node_inici: Vertex, nodes_objectiu: list[Vertex], dist_inici: object) -> list[Vertex]:
+    """Retorna els nodes del camí òptim des de l'inici al goal més proper."""
+    best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
+    nodes, _ = shortest_path(g, node_inici, best_goal)
+    return nodes
 
 def mesura_engany_gradient(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objectiu: list[Vertex], distancies_des_de_inici: object) -> float:
     """ Mesura 7 — Engany del gradient (miratge).
@@ -191,13 +193,12 @@ def mesura_engany_gradient(graf: Graph, puzzle: Puzzle, node_inici: Vertex, node
 
     Retorna un valor entre 0.0 i 1.0.
     """
-    best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
-    nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
+    nodes_cami = nodes_cami_optim(graf, node_inici, nodes_objectiu, distancies_des_de_inici)
     if not nodes_cami:  return 0.0
 
     # Heurística en cada pas del camí
-    h_inicial = _heuristica_manhattan(puzzle, graf.vp["state"][node_inici])
-    h_max = max(_heuristica_manhattan(puzzle, graf.vp["state"][v]) for v in nodes_cami)
+    h_inicial = heuristica_manhattan(puzzle, graf.vp["state"][node_inici])
+    h_max = max(heuristica_manhattan(puzzle, graf.vp["state"][v]) for v in nodes_cami)
 
     # Fórmula: engany = max(heuristica al llarg del camí) - heuristica_inicial
     engany = h_max - h_inicial
@@ -223,8 +224,7 @@ def mesura_labisme(graf: Graph, node_inici: Vertex, nodes_objectiu: list[Vertex]
     Retorna un valor entre 0.0 i 1.0.
     """
 
-    best_goal = min(nodes_objectiu, key=lambda v: int(distancies_des_de_inici[v]))
-    nodes_cami, _ = shortest_path(graf, node_inici, best_goal)
+    nodes_cami = nodes_cami_optim(graf, node_inici, nodes_objectiu, distancies_des_de_inici)
     if len(nodes_cami) < 3: return 0.0
 
     nodes_cami_set = set(nodes_cami)
@@ -262,7 +262,10 @@ def puntua_puzzle(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objecti
 
     Retorna una puntuació de 0 a 5 i un diccionari amb les puntuacions de cada mesura.
     """
-    t_inici_eval = time.monotonic()
+    num_nodes = graf.num_vertices()
+    if num_nodes > 400_000:
+        print(f"\nEl graf és massa gran ({num_nodes:,} nodes). S'assigna 0 a tot per seguretat.")
+        return 0.0, {k: 0.0 for k in ["estats", "solucio", "diametre", "eficiencia", "paranys", "ponts", "engany", "abisme"]}
 
     # Calculem les distàncies des de l'inici per reutilitzar-les
     dist_inici = shortest_distance(graf, source=node_inici)
@@ -271,48 +274,14 @@ def puntua_puzzle(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objecti
     if not nodes_objectiu:
         return 0.0, {k: 0.0 for k in ["estats", "solucio", "diametre", "eficiencia", "paranys", "ponts", "engany", "abisme"]}
 
-    # Variable per saber quina mètrica s'està executant en cada moment
-    metrica_actual = "Inicialització"
-
-    def check_timeout():
-        if TIMEOUT_EVAL_ACTIVAT and (time.monotonic() - t_inici_eval) > TIMEOUT_EVAL_SEGONS:
-            raise TimeoutError(f"L'avaluació de mètriques ha superat el límit de temps de 5 minuts a la mètrica: {metrica_actual}.")
-
-    try:
-        check_timeout()
-        metrica_actual = "Nombre d'estats"
-        m1 = mesura_nombre_estats(graf)
-        
-        check_timeout()
-        metrica_actual = "Longitud solució"
-        m2 = mesura_longitud_solucio(dist_inici, nodes_objectiu)
-        
-        check_timeout()
-        metrica_actual = "Diàmetre"
-        m3 = mesura_diametre(graf)
-        
-        check_timeout()
-        metrica_actual = "Eficiència camí"
-        m4 = mesura_eficiencia_cami(graf, dist_inici, nodes_objectiu)
-        
-        check_timeout()
-        metrica_actual = "Densitat de paranys"
-        m5 = mesura_densitat_paranys(graf)
-        
-        check_timeout()
-        metrica_actual = "Ponts crítics"
-        m6 = mesura_ponts_critics(graf, node_inici, nodes_objectiu, dist_inici)
-        
-        check_timeout()
-        metrica_actual = "Engany del gradient"
-        m7 = mesura_engany_gradient(graf, puzzle, node_inici, nodes_objectiu, dist_inici)
-        
-        check_timeout()
-        metrica_actual = "L'abisme"
-        m8 = mesura_labisme(graf, node_inici, nodes_objectiu, dist_inici)
-    except TimeoutError as e:
-        print(f"\n⏱️  {e} S'assigna 0 a tot.")
-        m1 = m2 = m3 = m4 = m5 = m6 = m7 = m8 = 0.0
+    m1 = mesura_nombre_estats(graf)
+    m2 = mesura_longitud_solucio(dist_inici, nodes_objectiu)
+    m3 = mesura_diametre(graf)
+    m4 = mesura_eficiencia_cami(graf, dist_inici, nodes_objectiu)
+    m5 = mesura_densitat_paranys(graf)
+    m6 = mesura_ponts_critics(graf, node_inici, nodes_objectiu, dist_inici)
+    m7 = mesura_engany_gradient(graf, puzzle, node_inici, nodes_objectiu, dist_inici)
+    m8 = mesura_labisme(graf, node_inici, nodes_objectiu, dist_inici)
 
     puntuacio_0_1 = 0.10*m1 + 0.25*m2 + 0.10*m3 + 0.10*m4 + 0.10*m5 + 0.10*m6 + 0.15*m7 + 0.10*m8
     puntuacio_final = puntuacio_0_1 * 5.0
@@ -340,7 +309,7 @@ def main(fitxer: str) -> float:
         graf = load_graph(str(graphml_path))
     else:
         print("Construint el graf...")
-            graf = build_graph(puzzle)
+        graf = build_graph(puzzle)
 
     node_inici     = next(v for v in graf.vertices() if graf.vp["is_start"][v])
     nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]

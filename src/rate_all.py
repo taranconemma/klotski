@@ -9,7 +9,7 @@ i desa els resultats a puzzles/downloads/ratings.json.
     python src/rate_all.py
 
 Genera:
-    puzzles/downloads/calibracio.json  — estadístics bruts de totes les mètriques
+    puzzles/downloads/calibracio.json  — estadístics de valors concrets de totes les mètriques
     puzzles/downloads/ratings.json     — puntuacions originals i recalibrades de cada puzzle
 
 No modifica mai eval.py. Al final mostra un bloc de codi llest per copiar-enganxar.
@@ -23,69 +23,35 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, Vertex, load_graph #type:ignore
+from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, load_graph #type:ignore
 
-from graph import build_graph, TIMEOUT_SEGONS
-from puzzle import Puzzle, State
+from graph import build_graph
+from puzzle import Puzzle
+from eval import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY, MAX_ABISME, heuristica_manhattan, nodes_cami_optim
 
-# LLINDARS ACTUALS D'EVAL.PY (hard-coded aquí per poder comparar-los)
-
-LLINDAR_ESTATS:   int   = 10_000
-LLINDAR_SOLUCIO:  int   = 30
-LLINDAR_DIAMETRE: int   = 50
-LLINDAR_PARANYS:  float = 0.30
-LLINDAR_PONTS:    int   = 15
-LLINDAR_ENGANY:   int   = 20
-LLINDAR_ABISME:   int   = 40
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CÀRREGA DEL GRAF (reutilitzant la caché de .graphml)
-# ─────────────────────────────────────────────────────────────────────────────
 
 def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
     """Carrega el graf des del .graphml si existeix, altrament el construeix i el desa."""
     graphml_path = fitxer_json.with_suffix(".graphml")
     if graphml_path.exists():
-        return load_graph(str(graphml_path))
+        g = load_graph(str(graphml_path))
+        if g.num_vertices() == 0:
+            raise TimeoutError("Graf buit (TIMEOUT previ)")
+        return g
     puzzle = Puzzle.from_json(fitxer_json.read_text())
-    g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
+    try:
+        g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
+    except TimeoutError:
+        g = Graph()
+        g.save(str(graphml_path))
+        raise TimeoutError("Temps límit per a la construcció del graf (desat graf buit)")
     g.save(str(graphml_path))
     return g
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# HELPERS INTERNS PER A LES MÈTRIQUES ORIGINALS
-# ─────────────────────────────────────────────────────────────────────────────
 
-def _heuristica_manhattan(puzzle: Puzzle, state: State) -> int:
-    """Suma de distàncies de Manhattan de cada peça objectiu a la seva meta."""
-    total = 0
-    for i, pos_meta in puzzle.goals:
-        px, py = state.positions[i]
-        mx, my = pos_meta
-        total += abs(px - mx) + abs(py - my)
-    return total
-
-
-def _nodes_cami_optim(
-    g: Graph,
-    node_inici: Vertex,
-    nodes_objectiu: list[Vertex],
-    dist_inici: object,
-) -> list[Vertex]:
-    """Retorna els nodes del camí òptim des de l'inici al goal més proper."""
-    best_goal = min(nodes_objectiu, key=lambda v: int(dist_inici[v]))
-    nodes, _ = shortest_path(g, node_inici, best_goal)
-    return nodes
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# EXTRACCIÓ DE MÈTRIQUES EN BRUT (totes en un sol pas per eficiència)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
-    """Extreu totes les mètriques numèriques reals d'un graf (sense normalitzar).
+def extraure_valors_concrets(g: Graph, puzzle: Puzzle) -> dict:
+    """Extreu tots els valors concrets reals d'un graf (sense normalitzar).
 
     Retorna un diccionari amb:
         Clàssiques:
@@ -100,6 +66,23 @@ def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
     """
     num_nodes   = g.num_vertices()
     num_arestes = g.num_edges()
+
+    # Si té més de 400.000 nodes, és massa gran i assignem 0 a tot per evitar bloquejos
+    if num_nodes > 400_000:
+        return {
+            "num_nodes":          num_nodes,
+            "num_arestes":        num_arestes,
+            "num_goals":          0,
+            "moviments_solucio":  0,
+            "diametre":           0,
+            "fraccio_atzucacs":   0.0,
+            "grau_mitja":         0.0,
+            "eficiencia_cami":    0.0,
+            "paranys_ponderat":   0.0,
+            "ponts_al_cami":      0,
+            "engany_gradient":    0,
+            "cost_abisme":        0,
+        }
 
     node_inici    = next(v for v in g.vertices() if g.vp["is_start"][v])
     nodes_objectiu = [v for v in g.vertices() if g.vp["is_goal"][v]]
@@ -184,10 +167,10 @@ def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
 
     engany_gradient = 0
     if nodes_objectiu and g.vp.get("state"):
-        nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
+        nodes_cami = nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
         if nodes_cami:
-            h_inicial = _heuristica_manhattan(puzzle, g.vp["state"][node_inici])
-            h_max = max(_heuristica_manhattan(puzzle, g.vp["state"][v]) for v in nodes_cami if g.vp["state"][v] is not None)
+            h_inicial = heuristica_manhattan(puzzle, g.vp["state"][node_inici])
+            h_max = max(heuristica_manhattan(puzzle, g.vp["state"][v]) for v in nodes_cami if g.vp["state"][v] is not None)
             engany_gradient = h_max - h_inicial
 
     # ── Mètrica 8: L'abisme ──────────────────────────────────────────────
@@ -195,7 +178,7 @@ def extraure_metriques_brutes(g: Graph, puzzle: Puzzle) -> dict:
 
     cost_abisme = 0
     if nodes_objectiu and num_nodes >= 3:
-        nodes_cami = _nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
+        nodes_cami = nodes_cami_optim(g, node_inici, nodes_objectiu, dist_inici)
         if len(nodes_cami) >= 3:
             nodes_cami_set = set(nodes_cami)
 
@@ -305,13 +288,13 @@ def analitzar_calibracio(totes_metriques: list[dict]) -> dict:
         "abisme":   "cost_abisme",
     }
     llindars_actuals = {
-        "estats":   LLINDAR_ESTATS,
-        "solucio":  LLINDAR_SOLUCIO,
-        "diametre": LLINDAR_DIAMETRE,
-        "paranys":  LLINDAR_PARANYS,
-        "ponts":    LLINDAR_PONTS,
-        "engany":   LLINDAR_ENGANY,
-        "abisme":   LLINDAR_ABISME,
+        "estats":   MAX_ESTATS,
+        "solucio":  MAX_SOLUCIO,
+        "diametre": MAX_DIAMETRE,
+        "paranys":  MAX_PARANYS,
+        "ponts":    MAX_PONTS,
+        "engany":   MAX_ENGANY,
+        "abisme":   MAX_ABISME,
     }
 
     estadistics: dict[str, dict] = {}
@@ -450,13 +433,13 @@ def main() -> None:
     print()
 
     llindars_actuals = {
-        "estats":   LLINDAR_ESTATS,
-        "solucio":  LLINDAR_SOLUCIO,
-        "diametre": LLINDAR_DIAMETRE,
-        "paranys":  LLINDAR_PARANYS,
-        "ponts":    LLINDAR_PONTS,
-        "engany":   LLINDAR_ENGANY,
-        "abisme":   LLINDAR_ABISME,
+        "estats":   MAX_ESTATS,
+        "solucio":  MAX_SOLUCIO,
+        "diametre": MAX_DIAMETRE,
+        "paranys":  MAX_PARANYS,
+        "ponts":    MAX_PONTS,
+        "engany":   MAX_ENGANY,
+        "abisme":   MAX_ABISME,
     }
 
     ratings_path = Path("puzzles/downloads/ratings.json")
@@ -497,7 +480,7 @@ def main() -> None:
         try:
             g      = carregar_o_construir_graf(fitxer)
             puzzle = Puzzle.from_json(fitxer.read_text())
-            metriques = extraure_metriques_brutes(g, puzzle)
+            metriques = extraure_valors_concrets(g, puzzle)
         except TimeoutError as e:
             print(f"⏱️  {e}")
             errors.append(clau_curta)
