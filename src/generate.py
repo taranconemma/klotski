@@ -1,28 +1,16 @@
-# generate.py. Donats certs paràmetre (completament lliures), genera un 
-# nou puzzle que guarda en un fitxer .json
-
 """
-generate.py — Genera puzzles de Klotski a l'atzar i selecciona els millors
+generate.py — Genera N puzzles nous per poder avaluar-los amb les mesures
+d'eval.py i guardar-ne M entre els millors. 
 
-Uso:
-    python src/generate.py --num 20 --millors 3 --sortida puzzles/generats/
+Utilització:
+    python src/generate.py --num N --millors M --sortida puzzles/generats/ --W W --H H
 
 Arguments opcionals:
     --num N        Quants puzzles generar en total (per defecte: 20)
-    --millors N    Quants dels millors guardar (per defecte: 3)
+    --millors M    Quants dels millors guardar (per defecte: 3)
     --sortida DIR  On guardar els puzzles seleccionats (per defecte: puzzles/generats/)
-    --W N          Amplada del taulell (per defecte: 4)
-    --H N          Alçada del taulell (per defecte: 5)
-
-Què fa:
-    1. Genera N puzzles a l'atzar amb el format correcte
-    2. Avalua cadascun amb les mesures de eval.py
-    3. Guarda els M millors en fitxers .json al directori indicat
-
-Per qué és útil:
-    Un generador completament aleatori rarament produeix puzzles bons.
-    Per tant, generem molts i ens quedem els millors, deixant que
-    la funció d'avaluació (eval.py) faci el filtratge.
+    --W W          Amplada del taulell (per defecte: 4)
+    --H H          Alçada del taulell (per defecte: 5)
 """
 
 import sys
@@ -30,15 +18,9 @@ import json
 import random
 import os
 
-# Importem les funcions dels nostres propis fitxers
-# IMPORTANT: graph.py ha d'existir a src/ i exportar build_graph()
-from src.graph_dfs import build_graph
+from graph import build_graph
 from puzzle import Puzzle
-
-# Importem la funció de puntuació d'eval.py
-# (la importem directament per no haver de cridar un subprocess)
 from eval import puntua_puzzle
-
 
 # -------------------------------------------------------------------------
 # FORMES DE POLIOMIN

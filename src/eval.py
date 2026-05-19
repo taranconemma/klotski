@@ -29,7 +29,7 @@ from pathlib import Path
 from graph_tool.all import Graph, Vertex, load_graph, shortest_distance, shortest_path, pseudo_diameter, label_biconnected_components  #type:ignore
 from collections import Counter
 
-from src.graph_dfs import build_graph
+from graph import build_graph
 from puzzle import Puzzle, State
 
 

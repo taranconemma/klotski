@@ -25,7 +25,7 @@ from pathlib import Path
 
 from graph_tool.all import shortest_distance, shortest_path, label_components, label_biconnected_components, pseudo_diameter, Graph, Vertex, load_graph #type:ignore
 
-from graph_dfs import build_graph, TIMEOUT_SEGONS
+from graph import build_graph, TIMEOUT_SEGONS
 from puzzle import Puzzle, State
 
 # LLINDARS ACTUALS D'EVAL.PY (hard-coded aquí per poder comparar-los)
