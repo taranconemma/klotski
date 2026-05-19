@@ -56,7 +56,7 @@ def state_key(puzzle: Puzzle, state: State) -> StateKey:
 
 def build_graph(puzzle: Puzzle) -> Graph:
     """
-    Construeix el graf d'estats del puzzle amb BFS.
+    Construeix el graf d'estats del puzzle amb DFS.
 
     Propietats dels nodes:
         state    - posicions de les peces (objecte Python)
@@ -100,17 +100,17 @@ def build_graph(puzzle: Puzzle) -> Graph:
             g.vp.is_goal[v] = is_goal(puzzle, state)
         return key_to_v[k]
 
-    # BFS des de l'estat inicial: l'hem de construir per poder-lo recórrer després amb les funcions pròpies de graph_tool
+    # DFS des de l'estat inicial: l'hem de construir per poder-lo recórrer després amb les funcions pròpies de graph_tool
     start_v = get_or_create(puzzle.start)
     g.vp.is_start[start_v] = True
 
-    queue: deque[State] = deque([puzzle.start])
+    stack: list[State] = [puzzle.start]
     visited: set[StateKey] = {state_key(puzzle, puzzle.start)}
 
-    t_inici = time.monotonic()  # Instant d'inici del BFS
+    t_inici = time.monotonic()  # Instant d'inici del DFS
 
-    while queue:
-        current = queue.popleft()
+    while stack:
+        current = stack.pop()
         current_key = state_key(puzzle, current)
         current_v = key_to_v[current_key]
 
@@ -134,7 +134,7 @@ def build_graph(puzzle: Puzzle) -> Graph:
 
             if next_key not in visited:
                 visited.add(next_key)
-                queue.append(next_state)
+                stack.append(next_state)
     return g
 
 
