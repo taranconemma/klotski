@@ -34,17 +34,10 @@ def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
     """Carrega el graf des del .graphml si existeix, altrament el construeix i el desa."""
     graphml_path = fitxer_json.with_suffix(".graphml")
     if graphml_path.exists():
-        g = load_graph(str(graphml_path))
-        if g.num_vertices() == 0:
-            raise TimeoutError("Graf buit (TIMEOUT previ)")
-        return g
+        return load_graph(str(graphml_path))
+    
     puzzle = Puzzle.from_json(fitxer_json.read_text())
-    try:
-        g = build_graph(puzzle)  # Pot llençar TimeoutError si TIMEOUT_ACTIVAT=True a graph.py
-    except TimeoutError:
-        g = Graph()
-        g.save(str(graphml_path))
-        raise TimeoutError("Temps límit per a la construcció del graf (desat graf buit)")
+    g = build_graph(puzzle)
     g.save(str(graphml_path))
     return g
 
@@ -67,8 +60,8 @@ def extraure_valors_concrets(g: Graph, puzzle: Puzzle) -> dict:
     num_nodes   = g.num_vertices()
     num_arestes = g.num_edges()
 
-    # Si té més de 400.000 nodes, és massa gran i assignem 0 a tot per evitar bloquejos
-    if num_nodes > 400_000:
+    # Si està buit (per timeout) o té més de 400.000 nodes, assignem 0 a tot per evitar bloquejos
+    if num_nodes == 0 or num_nodes > 400_000:
         return {
             "num_nodes":          num_nodes,
             "num_arestes":        num_arestes,

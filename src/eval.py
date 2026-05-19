@@ -262,11 +262,6 @@ def puntua_puzzle(graf: Graph, puzzle: Puzzle, node_inici: Vertex, nodes_objecti
 
     Retorna una puntuació de 0 a 5 i un diccionari amb les puntuacions de cada mesura.
     """
-    num_nodes = graf.num_vertices()
-    if num_nodes > 400_000:
-        print(f"\nEl graf és massa gran ({num_nodes:,} nodes). S'assigna 0 a tot per seguretat.")
-        return 0.0, {k: 0.0 for k in ["estats", "solucio", "diametre", "eficiencia", "paranys", "ponts", "engany", "abisme"]}
-
     # Calculem les distàncies des de l'inici per reutilitzar-les
     dist_inici = shortest_distance(graf, source=node_inici)
 
@@ -311,10 +306,15 @@ def main(fitxer: str) -> float:
         print("Construint el graf...")
         graf = build_graph(puzzle)
 
-    node_inici     = next(v for v in graf.vertices() if graf.vp["is_start"][v])
-    nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]
-
-    puntuacio, detalls = puntua_puzzle(graf, puzzle, node_inici, nodes_objectiu)
+    num_nodes = graf.num_vertices()
+    if num_nodes == 0 or num_nodes > 400_000:
+        print(f"\n⚠️  El graf és invàlid (buit o massa gran: {num_nodes:,} nodes). S'assigna 0 a tot per seguretat.")
+        puntuacio = 0.0
+        detalls = {k: 0.0 for k in ["estats", "solucio", "diametre", "eficiencia", "paranys", "ponts", "engany", "abisme"]}
+    else:
+        node_inici     = next(v for v in graf.vertices() if graf.vp["is_start"][v])
+        nodes_objectiu = [v for v in graf.vertices() if graf.vp["is_goal"][v]]
+        puntuacio, detalls = puntua_puzzle(graf, puzzle, node_inici, nodes_objectiu)
 
     print(f"\n  AVALUACIÓ DEL PUZZLE:")
     etiquetes = [

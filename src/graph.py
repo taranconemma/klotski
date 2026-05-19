@@ -118,7 +118,8 @@ def build_graph(puzzle: Puzzle) -> Graph:
         # Si ha passat massa temps, s'atura el programa i ens diu que el puzzle té molts estats
         # Per desactivar el límit, s'ha de posar TIMEOUT_ACTIVAT = False al principi d'aquest fitxer
         if TIMEOUT_ACTIVAT and (time.monotonic() - t_inici) > TIMEOUT_SEGONS:
-            raise TimeoutError( f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. \nEl puzzle té molts estats (ja s'han processat {g.num_vertices():,} estats (nodes)). ")
+            print(f"El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. Retorna graf buit.")
+            return Graph()
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
             next_state = apply_move(puzzle, current, (piece_idx, direction, dist))
@@ -158,11 +159,11 @@ def main() -> None:
         print("El graf ja existeix.")
         return
 
-    try: # Construir el graf i gestionar l'error de temps
-        g = build_graph(puzzle)
-    except TimeoutError as e:
-        print(f"\n Error de temps: {e}")
-        sys.exit(1) #sortida amb error
+    g = build_graph(puzzle)
+    if g.num_vertices() == 0:
+        print("\n El graf ha tardat més de 5 minuts i s'ha aturat.")
+        g.save(str(output_path))
+        sys.exit(1)
     
     print_summary(puzzle, g)
     g.save(str(output_path))
