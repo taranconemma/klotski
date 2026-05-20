@@ -1,0 +1,90 @@
+{
+    "estadistics": {
+        "estats": {
+            "min": 0,
+            "max": 569138,
+            "mitjana": 38216.0137,
+            "p25": 738.0,
+            "p50": 7364.0,
+            "p75": 27381.0,
+            "p90": 74176.8
+        },
+        "solucio": {
+            "min": 0,
+            "max": 243,
+            "mitjana": 54.2192,
+            "p25": 14.0,
+            "p50": 31.0,
+            "p75": 76.0,
+            "p90": 126.8
+        },
+        "diametre": {
+            "min": 0,
+            "max": 865,
+            "mitjana": 122.3973,
+            "p25": 46.0,
+            "p50": 104.0,
+            "p75": 187.0,
+            "p90": 210.2
+        },
+        "paranys": {
+            "min": 0.0,
+            "max": 0.028,
+            "mitjana": 0.0014,
+            "p25": 0.0,
+            "p50": 0.0004,
+            "p75": 0.0012,
+            "p90": 0.0025
+        },
+        "ponts": {
+            "min": 0,
+            "max": 42,
+            "mitjana": 3.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 3.0,
+            "p90": 9.0
+        },
+        "engany": {
+            "min": 0,
+            "max": 6,
+            "mitjana": 0.8356,
+            "p25": 0.0,
+            "p50": 1.0,
+            "p75": 1.0,
+            "p90": 2.0
+        }
+    },
+    "llindars_actuals": {
+        "estats": 76598,
+        "solucio": 127,
+        "diametre": 213,
+        "paranys": 0.0025,
+        "ponts": 9,
+        "engany": 2
+    },
+    "percentil_llindars_actuals": {
+        "estats": 90.4,
+        "solucio": 89.0,
+        "diametre": 89.0,
+        "paranys": 90.4,
+        "ponts": 87.7,
+        "engany": 76.7
+    },
+    "classificacio_llindars": {
+        "estats": "\u26a0\ufe0f  MASSA LAX",
+        "solucio": "\u26a0\ufe0f  MASSA LAX",
+        "diametre": "\u26a0\ufe0f  MASSA LAX",
+        "paranys": "\u26a0\ufe0f  MASSA LAX",
+        "ponts": "\u26a0\ufe0f  MASSA LAX",
+        "engany": "\u2705 BEN CALIBRAT"
+    },
+    "nous_llindars_proposats": {
+        "estats": 74176.8,
+        "solucio": 126.8,
+        "diametre": 210.2,
+        "paranys": 0.0025,
+        "ponts": 9.0,
+        "engany": 2.0
+    }
+}

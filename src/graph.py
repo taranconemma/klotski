@@ -16,7 +16,7 @@ import time
 from collections import deque
 from pathlib import Path
 
-from graph_tool.all import Graph, Vertex  # type:ignore
+from graph_tool.all import Graph, Vertex, load_graph  # type:ignore
 
 from logic import possible_moves, apply_move, is_goal
 from puzzle import Puzzle, State, Piece, Coord
@@ -24,6 +24,7 @@ from puzzle import Puzzle, State, Piece, Coord
 # Per desactivar el límit de temps, canvia TIMEOUT_ACTIVAT a False
 TIMEOUT_ACTIVAT: bool = True
 TIMEOUT_SEGONS: int   = 5 * 60  # 5 minuts
+LIMIT_NODES: int      = 800_000 # límit de nodes permesos en el graf
 
 # Tipus per a la clau d'un estat (no es repeteix per peces iguals intercanviades)
 StateKey = tuple[Coord, ...]
@@ -120,8 +121,8 @@ def build_graph(puzzle: Puzzle) -> Graph:
             print(f"\nError de temps: El graf ha tardat més de {TIMEOUT_SEGONS // 60} minuts i s'ha aturat. Retorna graf buit.")
             return Graph()
             
-        if g.num_vertices() > 600_000:
-            print(f"\nError de nodes: El graf ha superat el límit de 600.000 nodes ({g.num_vertices():,}). Retorna graf buit.")
+        if g.num_vertices() > LIMIT_NODES:
+            print(f"\nError de nodes: El graf ha superat el límit de {LIMIT_NODES:,} nodes ({g.num_vertices():,}). Retorna graf buit.")
             return Graph()
 
         for piece_idx, direction, dist in possible_moves(puzzle, current):
@@ -142,6 +143,41 @@ def build_graph(puzzle: Puzzle) -> Graph:
     return g
 
 
+def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
+    """
+    Carrega el graf des del .graphml si existeix.
+    Si no existeix, intenta construir-lo de forma segura. Si hi ha qualsevol error
+    (format JSON invàlid, timeout o excés de nodes), desa un graf buit al fitxer per
+    evitar tornar-lo a intentar en el futur, i retorna el graf buit.
+    """
+    graphml_path = fitxer_json.with_suffix(".graphml")
+    if graphml_path.exists():
+        return load_graph(str(graphml_path))
+    
+    g = Graph()
+    g.vp.state = g.new_vertex_property("object") 
+    g.vp.is_start = g.new_vertex_property("bool") 
+    g.vp.is_goal = g.new_vertex_property("bool")
+    g.gp.puzzle = g.new_graph_property("string")
+    g.gp.puzzle = "{}"
+
+    try:
+        puzzle = Puzzle.from_json(fitxer_json.read_text())
+        built_g = build_graph(puzzle)
+        if built_g.num_vertices() == 0:
+            # Timeout o límit de nodes
+            g.save(str(graphml_path))
+            return g
+        g = built_g
+    except Exception as e:
+        print(f"\n[graph.py] Error de validesa o de construcció per {fitxer_json.name}: {e}. Desant graf buit.")
+        g.save(str(graphml_path))
+        return g
+    
+    g.save(str(graphml_path))
+    return g
+
+
 def print_summary(puzzle: Puzzle, g: Graph) -> None:
     ''' Mostra per pantalla informació rellevant sobre el puzzle i del graf que s'ha construït. '''
     n_goals = sum(1 for v in g.vertices() if g.vp["is_goal"][v])
@@ -154,22 +190,13 @@ def print_summary(puzzle: Puzzle, g: Graph) -> None:
 
 def main() -> None:
     json_path = Path(sys.argv[1])
-    puzzle = Puzzle.from_json(json_path.read_text())
-    output_path = json_path.with_suffix(".graphml")
-    
-    # Si el graf ja existeix aturem el programa perquè no cal tornar-lo a construir.
-    if output_path.exists():
-        print("El graf ja existeix.")
-        return
-
-    g = build_graph(puzzle)
+    g = carregar_o_construir_graf(json_path)
     if g.num_vertices() == 0:
-        print("\n El graf ha tardat més de 5 minuts i s'ha aturat.")
-        g.save(str(output_path))
+        print("\n El graf no s'ha pogut construir o s'ha aturat per límit de temps/nodes. S'ha desat buit.")
         sys.exit(1)
     
+    puzzle = Puzzle.from_json(json_path.read_text())
     print_summary(puzzle, g)
-    g.save(str(output_path))
 
 if __name__ == "__main__":
     main()

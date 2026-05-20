@@ -26,21 +26,9 @@ from pathlib import Path
 from eval import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY
 from graph_tool.all import Graph, load_graph #type:ignore
 
-from graph import build_graph
+from graph import carregar_o_construir_graf, LIMIT_NODES
 from puzzle import Puzzle
 from eval import puntua_puzzle
-
-
-def carregar_o_construir_graf(fitxer_json: Path) -> Graph:
-    """Carrega el graf des del .graphml si existeix, altrament el construeix i el desa."""
-    graphml_path = fitxer_json.with_suffix(".graphml")
-    if graphml_path.exists():
-        return load_graph(str(graphml_path))
-    
-    puzzle = Puzzle.from_json(fitxer_json.read_text())
-    g = build_graph(puzzle)
-    g.save(str(graphml_path))
-    return g
 
 
 def extraure_valors_concrets(g: Graph, puzzle: Puzzle) -> dict:
@@ -53,7 +41,7 @@ def extraure_valors_concrets(g: Graph, puzzle: Puzzle) -> dict:
              "grau_mitja": 0.0, "eficiencia_cami": 0.0, "paranys_ponderat": 0.0,
              "ponts_al_cami": 0, "engany_gradient": 0}
 
-    if num_nodes == 0 or num_nodes > 600_000: return zeros
+    if num_nodes == 0 or num_nodes > LIMIT_NODES: return zeros
 
     node_inici     = next(v for v in g.vertices() if g.vp["is_start"][v])
     nodes_objectiu = [v for v in g.vertices() if g.vp["is_goal"][v]]
@@ -331,21 +319,26 @@ def main() -> None:
         print(f"  [{clau_curta}] Processant...", end=" ", flush=True)
 
         try:
-            g      = carregar_o_construir_graf(fitxer)
-            puzzle = Puzzle.from_json(fitxer.read_text())
-            metriques = extraure_valors_concrets(g, puzzle)
-        except TimeoutError as e:
-            print(f"⏱️  {e}")
-            errors.append(clau_curta)
-            continue
-        except ValueError as e:
-            print(f"❌  Puzzle invàlid ({e}), ometent.")
-            errors.append(clau_curta)
-            continue
+            g = carregar_o_construir_graf(fitxer)
+            if g.num_vertices() == 0:
+                metriques = {
+                    "num_nodes": 0, "num_arestes": 0, "num_goals": 0,
+                    "moviments_solucio": 0, "diametre": 0,
+                    "grau_mitja": 0.0, "eficiencia_cami": 0.0, "paranys_ponderat": 0.0,
+                    "ponts_al_cami": 0, "engany_gradient": 0
+                }
+            else:
+                puzzle = Puzzle.from_json(fitxer.read_text())
+                metriques = extraure_valors_concrets(g, puzzle)
         except Exception as e:
-            print(f"❌  Error inesperat ({type(e).__name__}: {e}), ometent.")
+            metriques = {
+                "num_nodes": 0, "num_arestes": 0, "num_goals": 0,
+                "moviments_solucio": 0, "diametre": 0,
+                "grau_mitja": 0.0, "eficiencia_cami": 0.0, "paranys_ponderat": 0.0,
+                "ponts_al_cami": 0, "engany_gradient": 0
+            }
+            print(f"  Error inesperat ({type(e).__name__}: {e}). Assignant puntuació 0.")
             errors.append(clau_curta)
-            continue
 
         totes_metriques.append(metriques)
         puntuacio_original = puntua_amb_llindars(metriques, llindars_actuals)

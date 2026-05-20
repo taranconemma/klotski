@@ -24,11 +24,13 @@ quitar el type ignore?
 averiguar si tarda mucho y hay que cambiarlo
 el mesura atzucacs???
 quizas juntar algunas funciones del eval haria que fueran mas raapido??a
+parany y engany no son en realidad lo contarrio???
 
 
 
 OTROS:
 Tema del timeout????
+un const.py??
 el main tenia un monton de cosasy mensajes tipo por si no existe el path o por si faltan argumentos pero hacen falta????
 hay que hacer tests???
 hacer que el rate all añada lo que ha tardado en hacer el graph y evaluarlo en tiempo, las dos cosas por separado

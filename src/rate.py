@@ -60,8 +60,8 @@ def main():
             puntuacio = int(round(puntuacio_float))
 
             print(f"\n[{clau_curta}] Enviant valoració de {puntuacio} estrelles.")
-    
-    #PUJADA D'UN ÚNIC PUZZLE
+            envia_valoracio(id_real, puntuacio, token)
+        return
 
     if os.path.exists("puzzles/index.json"):
         with open("puzzles/index.json") as f:

@@ -40,13 +40,12 @@ from puzzle import Puzzle, State
 # Executant rate_all.py es pot obtenir una proposta de nous valors en funció de 
 # última avaluació dels puzzles del repositori comú. 
 
-MAX_ESTATS:    int   = 10_000  # nodes
-MAX_SOLUCIO:   int   = 30      # moviments fins a la solució més curta
-MAX_DIAMETRE:  int   = 50      # pseudo-diàmetre del graf
-MAX_PARANYS:   float = 0.30    # fracció de nodes que son culs-de-sac propers
-MAX_PONTS:     int   = 15      # ponts crítics en el camí òptim
-MAX_ENGANY:    int   = 20      # caselles d'allunyament màxim de l'objectiu
-
+MAX_ESTATS:   int   = 74176   # nodes
+MAX_SOLUCIO:  int   = 126   # moviments
+MAX_DIAMETRE: int   = 210   # pseudo-diàmetre
+MAX_PARANYS:  float = 0.0025   # densitat paranys ponderada
+MAX_PONTS:    int   = 9   # ponts en el camí òptim
+MAX_ENGANY:   int   = 2   # caselles d'allunyament màxim
 
 # MESURES D'INTERÈS
 # Cada funció rep el graf i informació del puzzle i retorna un valor entre
@@ -118,12 +117,22 @@ def mesura_densitat_paranys(graf: Graph) -> tuple[float, float]:
     """
     n = graf.num_vertices()
     goal_indices = where(graf.vp["is_goal"].a)[0]
+    if len(goal_indices) == 0:
+        return 0.0, 0.0
 
-    # Distàncies mínimes a qualsevol objectiu inicialitzades amb infinit
-    dists_min = full(n, inf)
+    # Creem un node temporal super-origen (serà l'últim node)
+    v_dummy = graf.add_vertex()
     for goal_idx in goal_indices:
-        dists = shortest_distance(graf, source=goal_idx)
-        dists_min = minimum(dists_min, dists.a)
+        graf.add_edge(v_dummy, goal_idx)
+
+    # Calculem distàncies des de v_dummy en un sol BFS
+    dists_dummy = shortest_distance(graf, source=v_dummy)
+    
+    # Copiem l'array de distàncies excloent el v_dummy per restaurar l'estat original
+    dists_min = dists_dummy.a[:-1] - 1
+    
+    # Eliminem el dummy i les seves arestes (com que és l'últim, és O(1))
+    graf.remove_vertex(v_dummy)
 
     # Obtenim els graus de tots els vèrtexs
     graus = graf.get_out_degrees(graf.get_vertices())
