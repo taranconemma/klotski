@@ -21,10 +21,7 @@ from graph_tool.all import Graph, Vertex, load_graph  # type:ignore
 from logic import possible_moves, apply_move, is_goal
 from puzzle import Puzzle, State, Piece, Coord
 
-# Per desactivar el límit de temps, canvia TIMEOUT_ACTIVAT a False
-TIMEOUT_ACTIVAT: bool = True
-TIMEOUT_SEGONS: int   = 5 * 60  # 5 minuts
-LIMIT_NODES: int      = 800_000 # límit de nodes permesos en el graf
+from const import TIMEOUT_ACTIVAT, TIMEOUT_SEGONS, LIMIT_NODES
 
 # Tipus per a la clau d'un estat (no es repeteix per peces iguals intercanviades)
 StateKey = tuple[Coord, ...]

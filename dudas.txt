@@ -9,7 +9,7 @@ El dfs es peor porque puede dar recursion error??
 guardar de alguna forma que el graph no se puede generar para no intentarlo cada vez que vuelv o a hacer rate all si tarda mas de 5 minuts pero deberia ir en el graph no el rate all
 de que depende que el graf tarde mucho o el eval porque he visto en algunos no los genera aunque no tienen tantos nodos y otros si. 
 Y como sabe la cantidad de nodos si le digo que pare???
-
+fusionar con solve????
 
 
 
@@ -43,44 +43,3 @@ poner asserts
 revisar los prints
 
 QUe es esto que he cambiado del solve??? hace ahora un algortimo raro???
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-^CTraceback (most recent call last):
-  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 546, in <module>
-  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 481, in main
-    errors.append(clau_curta)
-                ~^^^^^^^^^^^^
-  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/src/rate_all.py", line 159, in extraure_metriques_brutes
-    # Obtenim els graus de tots els vèrtexs
-  File "/Users/emmataranconestrada/Documents/UPCdades/1r/AP2/klotski/.pixi/envs/default/lib/python3.13/site-packages/graph_tool/topology/__init__.py", line 2108, in shortest_distance
-    libgraph_tool_topology.get_dists(u._Graph__graph,
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
-                                     int(u.vertex(int(source))),
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    ...<5 lines>...
-                                     negative_weights, reached, dag,
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                                     get_pred, return_reached)
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
-KeyboardInterrupt
-make: *** [rate_all] Error 130
-
-
-
-
-
-

@@ -40,12 +40,7 @@ from puzzle import Puzzle, State
 # Executant rate_all.py es pot obtenir una proposta de nous valors en funció de 
 # última avaluació dels puzzles del repositori comú. 
 
-MAX_ESTATS:   int   = 74176   # nodes
-MAX_SOLUCIO:  int   = 126   # moviments
-MAX_DIAMETRE: int   = 210   # pseudo-diàmetre
-MAX_PARANYS:  float = 0.0025   # densitat paranys ponderada
-MAX_PONTS:    int   = 9   # ponts en el camí òptim
-MAX_ENGANY:   int   = 2   # caselles d'allunyament màxim
+from const import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY
 
 # MESURES D'INTERÈS
 # Cada funció rep el graf i informació del puzzle i retorna un valor entre

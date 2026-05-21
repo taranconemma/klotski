@@ -23,10 +23,10 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from eval import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY
-from graph_tool.all import Graph, load_graph #type:ignore
+from const import MAX_ESTATS, MAX_SOLUCIO, MAX_DIAMETRE, MAX_PARANYS, MAX_PONTS, MAX_ENGANY, LIMIT_NODES
+from graph_tool.all import Graph #type:ignore
 
-from graph import carregar_o_construir_graf, LIMIT_NODES
+from graph import carregar_o_construir_graf
 from puzzle import Puzzle
 from eval import puntua_puzzle
 
@@ -242,7 +242,7 @@ def imprime_bloc_codi(nous_llindars: dict, n_puzzles: int) -> None:
 
     print()
     print("═" * 78)
-    print("  BLOC DE CODI PER COPIAR I ENGANXAR A eval.py")
+    print("  BLOC DE CODI PER COPIAR I ENGANXAR A const.py")
     print(f"  (calibrat el {avui} amb {n_puzzles} puzzles)")
     print("─" * 78)
     print()
